@@ -3,11 +3,14 @@ import { StatusCodes } from "http-status-codes";
 import * as userService from "../services/userService";
 import { createError } from "../utils/responseUtils.js";
 import { loginValidator, USER_VALIDATION_ERRORS } from "../utils/validator.js";
-import { createToken } from "../utils/authorizeUtils.js";
+import { createToken, verifyToken } from "../utils/authorizeUtils.js";
 import getConnection from "../routes/pool.js";
+import { createHashedPassword } from "../utils/hash.js";
 
 export const signUp = async (req, res) => {
   const { email, password, nickname } = req.body;
+
+  const { hashedPassword, salt } = await createHashedPassword(password);
 
   const { isValid, message } = loginValidator({ email, password });
 
@@ -25,18 +28,21 @@ export const signUp = async (req, res) => {
         });
       } else {
         conn.query(
-          "INSERT INTO users ( nickname, email, password ) VALUES ?;",
+          "INSERT INTO users ( nickname, email, password, salt ) VALUES ?;",
           [
-            [[nickname, email, password]],
+            [[nickname, email, hashedPassword, salt]],
             (error) => {
               if (error) {
                 return console.log(error);
               }
             },
-            res.status(StatusCodes.OK).send({
-              message: "계정이 성공적으로 생성되었습니다",
-              token: createToken(email),
-            }),
+
+            res
+              .cookie("token", createToken(email, nickname))
+              .status(StatusCodes.OK)
+              .send({
+                message: "계정이 성공적으로 생성되었습니다",
+              }),
           ]
         );
       }
@@ -68,4 +74,11 @@ export const login = async (req, res) => {
       .status(StatusCodes.BAD_REQUEST)
       .send(createError(USER_VALIDATION_ERRORS.USER_NOT_FOUND));
   }
+};
+
+export const profile = async (req, res) => {
+  const cookie = req.headers.cookie;
+  console.log(123, req.headers);
+  const token = cookie.split("=")[1];
+  console.log(verifyToken(token));
 };
