@@ -31,10 +31,11 @@ class WebSocket {
 
     client.on("JOIN_ROOM", (data) => {
       console.log(`${data.nickname}님이 입장하였습니다.`);
+      this.io.to(roomName).emit("RECEIVE_MESSAGE", { chatList: this.chatList });
     });
 
     client.on("SEND_MESSAGE", (data) => {
-      this.chatList.push(data.message);
+      this.chatList.push(data);
 
       this.io.to(roomName).emit("RECEIVE_MESSAGE", { chatList: this.chatList });
     });
