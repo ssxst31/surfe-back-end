@@ -1,11 +1,10 @@
 import { StatusCodes } from "http-status-codes";
 
-import * as userService from "../services/userService";
 import { createError } from "../utils/responseUtils.js";
 import { loginValidator, USER_VALIDATION_ERRORS } from "../utils/validator.js";
 import { createToken, verifyToken } from "../utils/authorizeUtils.js";
 import getConnection from "../routes/pool.js";
-import { createHashedPassword } from "../utils/hash.js";
+import { createHashedPassword, verifyPassword } from "../utils/hash.js";
 
 export const signUp = async (req, res) => {
   const { email, password, nickname } = req.body;
@@ -53,27 +52,50 @@ export const signUp = async (req, res) => {
 };
 
 export const login = async (req, res) => {
-  const { id, password, nickname } = req.body;
+  const { email, password } = req.body;
 
   const { isValid, message } = loginValidator({ email, password });
+
   if (!isValid) {
     return res.status(StatusCodes.BAD_REQUEST).send(createError(message));
   }
 
-  const user = userService.findUser(
-    (user) => user.email === email && user.password === password
-  );
+  getConnection((conn) => {
+    const query = `SELECT SQL_CALC_FOUND_ROWS * FROM users WHERE email LIKE '%${email}%';`;
 
-  if (user) {
-    return res.status(StatusCodes.OK).send({
-      message: "성공적으로 로그인 했습니다",
-      token: createToken(email),
+    conn.query(query, async (error, rows) => {
+      if (error) throw error;
+      else {
+        if (rows.length === 0) {
+          return res.status(StatusCodes.BAD_REQUEST).send({
+            message: "없는 아이디 입니다.",
+          });
+        } else {
+          const row = rows[0];
+          const nickname = row.nickname;
+          const verified = await verifyPassword(
+            password,
+            row.salt,
+            row.password
+          );
+          if (!verified) {
+            return res.status(StatusCodes.BAD_REQUEST).send({
+              message: "비밀번호가 틀렸습니다.",
+            });
+          } else {
+            return res
+              .cookie("token", createToken({ email, nickname }))
+              .status(StatusCodes.OK)
+              .send({
+                message: "성공적으로 로그인 했습니다",
+              });
+          }
+        }
+      }
     });
-  } else {
-    return res
-      .status(StatusCodes.BAD_REQUEST)
-      .send(createError(USER_VALIDATION_ERRORS.USER_NOT_FOUND));
-  }
+
+    conn.release();
+  });
 };
 
 export const profile = async (req, res) => {
