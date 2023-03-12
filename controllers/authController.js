@@ -38,7 +38,7 @@ export const signUp = async (req, res) => {
             },
 
             res
-              .cookie("token", createToken(email, nickname))
+              .cookie("token", createToken({ email, nickname }))
               .status(StatusCodes.OK)
               .send({
                 message: "계정이 성공적으로 생성되었습니다",
@@ -77,8 +77,9 @@ export const login = async (req, res) => {
 };
 
 export const profile = async (req, res) => {
-  const cookie = req.headers.cookie;
-  console.log(123, req.headers);
-  const token = cookie.split("=")[1];
-  console.log(verifyToken(token));
+  const cookies = req.headers.cookies;
+
+  const token = cookies.split("=")[1].split(";")[0];
+
+  return res.status(StatusCodes.OK).send({ data: verifyToken(token) });
 };
