@@ -2,7 +2,7 @@ import { StatusCodes } from "http-status-codes";
 
 import { createError } from "../utils/responseUtils.js";
 import { loginValidator, USER_VALIDATION_ERRORS } from "../utils/validator.js";
-import { createToken, verifyToken } from "../utils/authorizeUtils.js";
+import { createToken } from "../utils/authorizeUtils.js";
 import getConnection from "../routes/pool.js";
 import { createHashedPassword, verifyPassword } from "../utils/hash.js";
 
@@ -96,12 +96,4 @@ export const login = async (req, res) => {
 
     conn.release();
   });
-};
-
-export const profile = async (req, res) => {
-  const cookies = req.headers.cookies;
-
-  const token = cookies.split("=")[1].split(";")[0];
-
-  return res.status(StatusCodes.OK).send({ data: verifyToken(token) });
 };
