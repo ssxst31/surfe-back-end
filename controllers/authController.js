@@ -97,3 +97,7 @@ export const login = async (req, res) => {
     conn.release();
   });
 };
+
+export const logout = async (req, res) => {
+  return res.clearCookie("token").end();
+};
