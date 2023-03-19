@@ -1,9 +1,9 @@
 import { Server } from "socket.io";
+import getConnection from "../routes/pool.js";
 
 class WebSocket {
   constructor() {
     this.io = null;
-    this.chatList = [];
   }
 
   init(server) {
@@ -31,13 +31,43 @@ class WebSocket {
 
     client.on("JOIN_ROOM", (data) => {
       console.log(`${data.nickname}님이 입장하였습니다.`);
-      this.io.to(roomName).emit("RECEIVE_MESSAGE", { chatList: this.chatList });
+
+      getConnection((conn) => {
+        const sql1 = `SELECT * FROM chat`;
+        conn.query(sql1, (error, rows) => {
+          return this.io
+            .to(roomName)
+            .emit("RECEIVE_MESSAGE", { chatList: rows });
+        });
+
+        conn.release();
+      });
     });
 
     client.on("SEND_MESSAGE", (data) => {
-      this.chatList.push(data);
+      const { content, nickname } = data;
 
-      this.io.to(roomName).emit("RECEIVE_MESSAGE", { chatList: this.chatList });
+      getConnection((conn) => {
+        conn.query(
+          "INSERT INTO chat ( content, nickname, createAt ) VALUES ?;",
+          [[[content, nickname, new Date()]]],
+          (error) => {
+            if (error) {
+              return console.log(error);
+            }
+
+            const sql1 = `SELECT * FROM chat`;
+
+            conn.query(sql1, (error, rows) => {
+              return this.io
+                .to(roomName)
+                .emit("RECEIVE_MESSAGE", { chatList: rows });
+            });
+          }
+        );
+
+        conn.release();
+      });
     });
   }
 
