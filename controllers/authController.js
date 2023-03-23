@@ -7,7 +7,7 @@ import getConnection from "../routes/pool.js";
 import { createHashedPassword, verifyPassword } from "../utils/hash.js";
 
 export const signUp = async (req, res) => {
-  const { email, password, nickname } = req.body;
+  const { email, password, nickname, lat, lng } = req.body;
 
   const { hashedPassword, salt } = await createHashedPassword(password);
 
@@ -27,9 +27,9 @@ export const signUp = async (req, res) => {
         });
       } else {
         conn.query(
-          "INSERT INTO users ( nickname, email, password, salt ) VALUES ?;",
+          "INSERT INTO users ( nickname, email, password, salt, lat, lng ) VALUES ?;",
           [
-            [[nickname, email, hashedPassword, salt]],
+            [[nickname, email, hashedPassword, salt, lat, lng]],
             (error) => {
               if (error) {
                 return console.log(error);
