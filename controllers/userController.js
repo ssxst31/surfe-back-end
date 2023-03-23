@@ -22,7 +22,7 @@ export const profile = async (req, res) => {
   const token = cookies.split("=")[1].split(";")[0];
 
   getConnection((conn) => {
-    const sql1 = `SELECT nickname, email, lat, lng FROM chat.users WHERE email LIKE '${
+    const sql1 = `SELECT id, nickname, email, lat, lng FROM chat.users WHERE email LIKE '${
       verifyToken(token).email
     }'`;
     conn.query(sql1, (error, rows) => {
