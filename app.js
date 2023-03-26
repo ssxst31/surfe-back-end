@@ -7,10 +7,15 @@ import userRouter from "./routes/userRouter.js";
 
 const app = express();
 
+const ALLOWED_HOSTS = ["http://localhost:3000"];
+
 app.use(
   cors({
     credentials: true,
-    origin: "http://localhost:3000",
+    origin: (origin, callback) => {
+      const isTrue = ALLOWED_HOSTS.indexOf(origin) !== -1;
+      callback(null, isTrue);
+    },
   })
 );
 
