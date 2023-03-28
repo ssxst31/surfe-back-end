@@ -17,7 +17,7 @@ export const list = async (req, res) => {
 };
 
 export const profile = async (req, res) => {
-  const cookies = req.headers.cookies;
+  const cookies = req.headers.cookie;
 
   const token = cookies.split("=")[1].split(";")[0];
 
