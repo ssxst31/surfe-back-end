@@ -37,7 +37,9 @@ export const signUp = async (req, res) => {
             },
 
             res
-              .cookie("token", createToken({ email, nickname }))
+              .cookie("token", createToken({ email, nickname }), {
+                domain: ".surfe.store",
+              })
               .status(StatusCodes.OK)
               .send({
                 message: "계정이 성공적으로 생성되었습니다",
@@ -84,7 +86,9 @@ export const login = async (req, res) => {
             });
           } else {
             return res
-              .cookie("token", createToken({ email, nickname }))
+              .cookie("token", createToken({ email, nickname }), {
+                domain: ".surfe.store",
+              })
               .status(StatusCodes.OK)
               .send({
                 message: "성공적으로 로그인 했습니다",

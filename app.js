@@ -7,7 +7,7 @@ import userRouter from "./routes/userRouter.js";
 
 const app = express();
 
-const ALLOWED_HOSTS = ["http://localhost:3000", "https://surfe.netlify.app"];
+const ALLOWED_HOSTS = ["http://localhost:3000", "https://www.surfe.store"];
 
 app.use(
   cors({
