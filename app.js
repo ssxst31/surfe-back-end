@@ -1,5 +1,6 @@
 import cors from "cors";
 import bodyParser from "body-parser";
+import cookieParser from "cookie-parser";
 
 import express from "express";
 import authRouter from "./routes/authRouter.js";
@@ -18,7 +19,7 @@ app.use(
     },
   })
 );
-
+app.use(cookieParser());
 app.use(express.json());
 app.use(bodyParser.urlencoded({ extended: true }));
 app.use(bodyParser.json());
