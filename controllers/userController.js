@@ -17,7 +17,7 @@ export const list = async (req, res) => {
 };
 
 export const profile = async (req, res) => {
-  const cookies = req.headers.cookies;
+  const cookies = req.headers.cookies ?? req.headers.cookie;
 
   if (!cookies) {
     return res.status(StatusCodes.BAD_REQUEST).send("토큰이 없습니다.");

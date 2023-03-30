@@ -51,7 +51,6 @@ class WebSocket {
         const sql1 = `SELECT * FROM chat WHERE roomName LIKE '${data.roomName}'`;
 
         conn.query(sql1, (error, rows) => {
-          console.log(rows);
           return this.io
             .to(data.roomName)
             .emit("RECEIVE_PRIVATE_MESSAGE", { chatList: rows });
@@ -64,7 +63,7 @@ class WebSocket {
     client.on("SEND_MESSAGE", (data) => {
       const { content, nickname } = data;
       const roomName = data.roomName;
-      console.log(roomName);
+
       client.join(data.roomName);
       getConnection((conn) => {
         conn.query(
@@ -103,9 +102,8 @@ class WebSocket {
             }
 
             const sql1 = `SELECT * FROM chat WHERE roomName LIKE '${roomName}'`;
-            console.log(content, nickname, roomName);
+
             conn.query(sql1, (error, rows) => {
-              console.log(rows);
               return this.io
                 .to(roomName)
                 .emit("RECEIVE_PRIVATE_MESSAGE", { chatList: rows });
