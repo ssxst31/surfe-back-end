@@ -2,15 +2,44 @@ import { StatusCodes } from "http-status-codes";
 
 import { verifyToken } from "../utils/authorizeUtils.js";
 import getConnection from "../routes/pool.js";
+import { getDistance } from "../utils/map";
 
-export const list = async (req, res) => {
+export const userListByMeDistance = async (req, res) => {
   getConnection((conn) => {
-    const sql1 = `SELECT * FROM users`;
-    conn.query(sql1, (error, rows) => {
-      return res.status(StatusCodes.OK).send({
-        data: rows,
-      });
-    });
+    conn.query(
+      `SELECT * FROM chat.users WHERE nickname LIKE '${req.userNickname}';`,
+      (error, rows1) => {
+        if (error) {
+          return console.log(error);
+        }
+
+        const sql1 = `SELECT * FROM users`;
+
+        conn.query(sql1, (error, rows) => {
+          let userList = [];
+
+          for (let i = 0; i < rows.length; i++) {
+            if (
+              getDistance(
+                rows1[0].lat,
+                rows1[0].lng,
+                rows[i].lat,
+                rows[i].lng
+              ) /
+                1000 <
+                5 &&
+              rows1[0].id !== rows[i].id
+            ) {
+              userList.push({ id: rows[i].id, nickname: rows[i].nickname });
+            }
+          }
+
+          return res.status(StatusCodes.OK).send({
+            userList,
+          });
+        });
+      }
+    );
 
     conn.release();
   });
