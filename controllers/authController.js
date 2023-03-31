@@ -38,7 +38,7 @@ export const signUp = async (req, res) => {
 
             res
               .cookie("token", createToken({ email, nickname }), {
-                domain: ".surfe.store",
+                maxAge: 3600 * 24 * 7,
               })
               .status(StatusCodes.OK)
               .send({
@@ -87,7 +87,7 @@ export const login = async (req, res) => {
           } else {
             return res
               .cookie("token", createToken({ email, nickname }), {
-                domain: ".surfe.store",
+                maxAge: 3600 * 24 * 7,
               })
               .status(StatusCodes.OK)
               .send({
