@@ -2,7 +2,7 @@ import { StatusCodes } from "http-status-codes";
 
 import { verifyToken } from "../utils/authorizeUtils.js";
 import getConnection from "../routes/pool.js";
-import { getDistance } from "../utils/map";
+import { getDistance } from "../utils/map.js";
 
 export const userListByMeDistance = async (req, res) => {
   getConnection((conn) => {

@@ -1,6 +1,6 @@
 import { StatusCodes } from "http-status-codes";
 
-import { verifyToken } from "../utils/authorizeUtils";
+import { verifyToken } from "../utils/authorizeUtils.js";
 import getConnection from "../routes/pool.js";
 
 export const authMiddleware = async (req, res, next) => {
