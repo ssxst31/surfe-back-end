@@ -7,7 +7,7 @@ import { getDistance } from "../utils/map.js";
 export const userListByMeDistance = async (req, res) => {
   getConnection((conn) => {
     conn.query(
-      `SELECT * FROM chat.users WHERE nickname LIKE '${req.userNickname}';`,
+      `SELECT * FROM chat.users WHERE email LIKE '${req.email}';`,
       (error, rows1) => {
         if (error) {
           return console.log(error);
@@ -46,17 +46,24 @@ export const userListByMeDistance = async (req, res) => {
 };
 
 export const profile = async (req, res) => {
-  const cookies = req.headers.cookies ?? req.headers.cookie;
-
-  if (!cookies) {
-    return res.status(StatusCodes.BAD_REQUEST).send("토큰이 없습니다.");
-  }
-
-  const token = cookies.split("=")[1].split(";")[0];
   getConnection((conn) => {
-    const sql1 = `SELECT id, nickname, email, lat, lng FROM chat.users WHERE email LIKE '${
-      verifyToken(token).email
-    }'`;
+    const sql1 = `SELECT users.email, users.id, location.lat, location.lng, users.nickname FROM location JOIN users ON users.email = location.email WHERE location.email LIKE '${req.email}'`;
+    console.log(sql1);
+    conn.query(sql1, (error, rows) => {
+      console.log(rows[0]);
+      return res.status(StatusCodes.OK).send(rows[0]);
+    });
+
+    conn.release();
+  });
+};
+
+export const location = async (req, res) => {
+  const { lat, lng, email } = req.body;
+  console.log(lat, lng, email);
+  getConnection((conn) => {
+    const sql1 = `INSERT INTO location (email, lat, lng ) VALUES ('${email}', '${lat}', '${lng}' ) ON DUPLICATE KEY UPDATE email = '${email}', lat = '${lat}', lng = '${lng}'`;
+
     conn.query(sql1, (error, rows) => {
       return res.status(StatusCodes.OK).send(rows[0]);
     });

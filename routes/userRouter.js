@@ -10,5 +10,6 @@ router.get(
   authMiddleware,
   userController.userListByMeDistance
 );
+router.post("/location", authMiddleware, userController.location);
 
 export default router;

@@ -7,7 +7,7 @@ import getConnection from "../routes/pool.js";
 import { createHashedPassword, verifyPassword } from "../utils/hash.js";
 
 export const signUp = async (req, res) => {
-  const { email, password, nickname, lat, lng } = req.body;
+  const { email, password, nickname } = req.body;
 
   const { hashedPassword, salt } = await createHashedPassword(password);
 
@@ -18,7 +18,7 @@ export const signUp = async (req, res) => {
   }
 
   getConnection((conn) => {
-    const sql1 = `SELECT SQL_CALC_FOUND_ROWS * FROM users WHERE email LIKE '%${email}%';`;
+    const sql1 = `SELECT SQL_CALC_FOUND_ROWS * FROM users WHERE email LIKE '${email}';`;
 
     conn.query(sql1, (error, rows) => {
       if (rows.length > 0) {
@@ -27,24 +27,21 @@ export const signUp = async (req, res) => {
         });
       } else {
         conn.query(
-          "INSERT INTO users ( nickname, email, password, salt, lat, lng ) VALUES ?;",
-          [
-            [[nickname, email, hashedPassword, salt, lat, lng]],
-            (error) => {
-              if (error) {
-                return console.log(error);
-              }
-            },
-
-            res
-              .cookie("token", createToken({ email, nickname }), {
-                maxAge: 3600 * 24 * 7,
-              })
-              .status(StatusCodes.OK)
-              .send({
-                message: "계정이 성공적으로 생성되었습니다",
-              }),
-          ]
+          `INSERT INTO users ( nickname, email, password, salt ) VALUES ('${nickname}', '${email}', '${hashedPassword}', '${salt}');
+          INSERT INTO location (email, lat, lng ) VALUES ('${email}', '0', '0' )`,
+          (error) => {
+            if (error) {
+              return console.log(error);
+            }
+          },
+          res
+            .cookie("token", createToken({ email, nickname }), {
+              maxAge: 3600 * 24 * 7,
+            })
+            .status(StatusCodes.OK)
+            .send({
+              message: "계정이 성공적으로 생성되었습니다",
+            })
         );
       }
     });
@@ -63,7 +60,7 @@ export const login = async (req, res) => {
   }
 
   getConnection((conn) => {
-    const query = `SELECT SQL_CALC_FOUND_ROWS * FROM users WHERE email LIKE '%${email}%';`;
+    const query = `SELECT SQL_CALC_FOUND_ROWS * FROM users WHERE email LIKE '${email}';`;
 
     conn.query(query, async (error, rows) => {
       if (error) throw error;

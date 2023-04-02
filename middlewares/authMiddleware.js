@@ -30,7 +30,8 @@ export const authMiddleware = async (req, res, next) => {
       conn.release();
     });
 
-    req.userNickname = user.nickname;
+    req.email = user.email;
+
     next();
   } catch (error) {
     return res.status(StatusCodes.UNAUTHORIZED).send({
