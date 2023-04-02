@@ -1,4 +1,5 @@
 import { Server } from "socket.io";
+
 import getConnection from "../routes/pool.js";
 
 class WebSocket {
@@ -61,20 +62,20 @@ class WebSocket {
     });
 
     client.on("SEND_MESSAGE", (data) => {
-      const { content, nickname } = data;
+      const { content, memberId } = data;
       const roomName = data.roomName;
 
       client.join(data.roomName);
       getConnection((conn) => {
         conn.query(
-          "INSERT INTO chat ( content, nickname, createAt, roomName ) VALUES ?;",
-          [[[content, nickname, new Date(), roomName]]],
+          "INSERT INTO chat ( content, memberId, createAt, roomName ) VALUES ?;",
+          [[[content, memberId, new Date(), roomName]]],
           (error) => {
             if (error) {
               return console.log(error);
             }
 
-            const sql1 = `SELECT * FROM chat WHERE roomName LIKE '${roomName}'`;
+            const sql1 = `SELECT chat.id, chat.content, users.nickname, chat.createAt, chat.roomName FROM chat JOIN users ON users.id = chat.memberId WHERE roomName LIKE '${roomName}'`;
 
             conn.query(sql1, (error, rows) => {
               return this.io
@@ -89,19 +90,19 @@ class WebSocket {
     });
 
     client.on("SEND_PRIVATE_MESSAGE", (data) => {
-      const { content, nickname } = data;
+      const { content, memberId } = data;
       const roomName = data.roomName;
       client.join(roomName);
       getConnection((conn) => {
         conn.query(
-          "INSERT INTO chat ( content, nickname, createAt, roomName ) VALUES ?;",
-          [[[content, nickname, new Date(), roomName]]],
+          "INSERT INTO chat ( content, memberId, createAt, roomName ) VALUES ?;",
+          [[[content, memberId, new Date(), roomName]]],
           (error) => {
             if (error) {
               return console.log(error);
             }
 
-            const sql1 = `SELECT * FROM chat WHERE roomName LIKE '${roomName}'`;
+            const sql1 = `SELECT chat.id, chat.content, users.nickname, chat.createAt, chat.roomName FROM chat JOIN users ON users.id = chat.memberId WHERE roomName LIKE '${roomName}'`;
 
             conn.query(sql1, (error, rows) => {
               return this.io
