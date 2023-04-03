@@ -63,7 +63,10 @@ export const location = async (req, res) => {
     const sql1 = `INSERT INTO location (email, lat, lng ) VALUES ('${email}', '${lat}', '${lng}' ) ON DUPLICATE KEY UPDATE email = '${email}', lat = '${lat}', lng = '${lng}'`;
 
     conn.query(sql1, (error, rows) => {
-      return res.status(StatusCodes.OK).send(rows[0]);
+      if (error) {
+        return res.status(StatusCodes.BAD_REQUEST).send(error);
+      }
+      return res.status(StatusCodes.OK).send("OK");
     });
 
     conn.release();
