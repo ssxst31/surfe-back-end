@@ -94,6 +94,7 @@ export const login = async (req, res) => {
           });
         } else {
           const row = rows[0];
+          const memberId = row.id;
           const nickname = row.nickname;
           const verified = await verifyPassword(
             password,
@@ -106,7 +107,7 @@ export const login = async (req, res) => {
             });
           } else {
             return res
-              .cookie("token", createToken({ email, nickname }), {
+              .cookie("token", createToken({ email, nickname, memberId }), {
                 maxAge: 3600 * 24 * 7,
               })
               .status(StatusCodes.OK)
