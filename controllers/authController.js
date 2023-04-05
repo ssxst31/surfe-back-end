@@ -7,7 +7,7 @@ import getConnection from "../routes/pool.js";
 import { createHashedPassword, verifyPassword } from "../utils/hash.js";
 
 export const signUp = async (req, res) => {
-  const { email, password, nickname } = req.body;
+  const { email, password, nickname, interestList } = req.body;
 
   const { hashedPassword, salt } = await createHashedPassword(password);
 
@@ -26,23 +26,46 @@ export const signUp = async (req, res) => {
           message: USER_VALIDATION_ERRORS.EXIST_USER,
         });
       } else {
-        conn.query(
-          `INSERT INTO users ( nickname, email, password, salt ) VALUES ('${nickname}', '${email}', '${hashedPassword}', '${salt}');
-          INSERT INTO location (email, lat, lng ) VALUES ('${email}', '0', '0' )`,
-          (error) => {
+        const dsa = `INSERT INTO users ( nickname, email, password, salt ) VALUES ('${nickname}', '${email}', '${hashedPassword}', '${salt}');`;
+
+        conn.query(dsa, (error) => {
+          if (error) {
+            return console.log(error);
+          }
+
+          const sql1 = `SELECT SQL_CALC_FOUND_ROWS * FROM users WHERE email LIKE '${email}';`;
+          conn.query(sql1, (error, rows2) => {
             if (error) {
               return console.log(error);
             }
-          },
-          res
-            .cookie("token", createToken({ email, nickname }), {
-              maxAge: 3600 * 24 * 7,
-            })
-            .status(StatusCodes.OK)
-            .send({
-              message: "계정이 성공적으로 생성되었습니다",
-            })
-        );
+
+            conn.query(
+              `INSERT INTO location (memberId, lat, lng ) VALUES ('${
+                rows2[0].id
+              }', '0', '0' );
+              INSERT INTO interestList (memberId, interestList) VALUES ('${
+                rows2[0].id
+              }', '${JSON.stringify(interestList)}' );`,
+              (error) => {
+                if (error) {
+                  return console.log(error);
+                }
+              },
+              res
+                .cookie(
+                  "token",
+                  createToken({ email, nickname, memberId: rows2[0].id }),
+                  {
+                    maxAge: 3600 * 24 * 7,
+                  }
+                )
+                .status(StatusCodes.OK)
+                .send({
+                  message: "계정이 성공적으로 생성되었습니다",
+                })
+            );
+          });
+        });
       }
     });
 

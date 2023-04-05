@@ -6,13 +6,13 @@ import { getDistance } from "../utils/map.js";
 export const userListByMeDistance = async (req, res) => {
   getConnection((conn) => {
     conn.query(
-      `SELECT users.id, location.lat, location.lng, users.nickname FROM location JOIN users ON users.email = location.email WHERE location.email LIKE '${req.email}'`,
+      `SELECT users.id, location.lat, location.lng, users.nickname FROM location JOIN users ON users.id = location.memberId WHERE location.memberId LIKE '${req.memberId}'`,
       (error, rows1) => {
         if (error) {
           return console.log(error);
         }
 
-        const sql1 = `SELECT users.id, location.lat, location.lng, users.nickname FROM location JOIN users ON users.email = location.email`;
+        const sql1 = `SELECT users.id, location.lat, location.lng, users.nickname FROM location JOIN users ON users.id = location.memberId`;
 
         conn.query(sql1, (error, rows) => {
           let userList = [];
@@ -46,7 +46,7 @@ export const userListByMeDistance = async (req, res) => {
 
 export const profile = async (req, res) => {
   getConnection((conn) => {
-    const sql1 = `SELECT users.email, users.id, location.lat, location.lng, users.nickname FROM location JOIN users ON users.email = location.email WHERE location.email LIKE '${req.email}'`;
+    const sql1 = `SELECT users.email, users.id, location.lat, location.lng, users.nickname FROM location JOIN users ON users.id = location.memberId WHERE location.memberId LIKE '${req.memberId}'`;
 
     conn.query(sql1, (error, rows) => {
       return res.status(StatusCodes.OK).send(rows[0]);
@@ -57,16 +57,34 @@ export const profile = async (req, res) => {
 };
 
 export const location = async (req, res) => {
-  const { lat, lng, email } = req.body;
+  const { lat, lng, memberId } = req.body;
 
   getConnection((conn) => {
-    const sql1 = `INSERT INTO location (email, lat, lng ) VALUES ('${email}', '${lat}', '${lng}' ) ON DUPLICATE KEY UPDATE email = '${email}', lat = '${lat}', lng = '${lng}'`;
+    const sql1 = `INSERT INTO location (memberId, lat, lng ) VALUES ('${memberId}', '${lat}', '${lng}' ) ON DUPLICATE KEY UPDATE memberId = '${memberId}', lat = '${lat}', lng = '${lng}'`;
 
     conn.query(sql1, (error, rows) => {
       if (error) {
         return res.status(StatusCodes.BAD_REQUEST).send(error);
       }
       return res.status(StatusCodes.OK).send("OK");
+    });
+
+    conn.release();
+  });
+};
+
+export const interestList = async (req, res) => {
+  const { userId } = req.params;
+
+  getConnection((conn) => {
+    const sql1 = `SELECT * FROM interestList WHERE memberId LIKE '${userId}'`;
+
+    conn.query(sql1, (error, rows) => {
+      const row = {
+        ...rows[0],
+        interestList: JSON.parse(rows[0].interestList),
+      };
+      return res.status(StatusCodes.OK).send(row.interestList);
     });
 
     conn.release();

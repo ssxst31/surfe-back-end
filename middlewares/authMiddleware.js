@@ -30,7 +30,7 @@ export const authMiddleware = async (req, res, next) => {
       conn.release();
     });
 
-    req.email = user.email;
+    req.memberId = user.memberId;
 
     next();
   } catch (error) {
