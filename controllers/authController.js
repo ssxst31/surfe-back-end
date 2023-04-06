@@ -7,7 +7,7 @@ import getConnection from "../routes/pool.js";
 import { createHashedPassword, verifyPassword } from "../utils/hash.js";
 
 export const signUp = async (req, res) => {
-  const { email, password, nickname, interestList } = req.body;
+  const { email, password, nickname, interestList, mbti, introduce } = req.body;
 
   const { hashedPassword, salt } = await createHashedPassword(password);
 
@@ -45,7 +45,13 @@ export const signUp = async (req, res) => {
               }', '0', '0' );
               INSERT INTO interestList (memberId, interestList) VALUES ('${
                 rows2[0].id
-              }', '${JSON.stringify(interestList)}' );`,
+              }', '${JSON.stringify(interestList)}' );
+              INSERT INTO mbti (memberId, mbti ) VALUES ('${
+                rows2[0].id
+              }', '${mbti}' );
+              INSERT INTO introduce (memberId, introduce ) VALUES ('${
+                rows2[0].id
+              }', '${introduce}' );`,
               (error) => {
                 if (error) {
                   return console.log(error);

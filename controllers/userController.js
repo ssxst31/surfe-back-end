@@ -48,7 +48,7 @@ export const profile = async (req, res) => {
   const { userId } = req.params;
 
   getConnection((conn) => {
-    const sql1 = `SELECT users.nickname, interestList.interestList FROM interestList JOIN users ON users.id = interestList.memberId WHERE interestList.memberId LIKE '${userId}'`;
+    const sql1 = `SELECT  users.nickname, interestList.interestList, mbti.mbti, introduce.introduce FROM interestList JOIN users ON users.id = interestList.memberId JOIN mbti ON mbti.memberId = interestList.memberId JOIN introduce ON introduce.memberId = interestList.memberId WHERE interestList.memberId LIKE '${userId}'`;
 
     conn.query(sql1, (error, rows) => {
       const row = {
