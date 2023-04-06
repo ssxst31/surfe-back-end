@@ -45,46 +45,17 @@ export const userListByMeDistance = async (req, res) => {
 };
 
 export const profile = async (req, res) => {
-  getConnection((conn) => {
-    const sql1 = `SELECT users.email, users.id, location.lat, location.lng, users.nickname FROM location JOIN users ON users.id = location.memberId WHERE location.memberId LIKE '${req.memberId}'`;
-
-    conn.query(sql1, (error, rows) => {
-      return res.status(StatusCodes.OK).send(rows[0]);
-    });
-
-    conn.release();
-  });
-};
-
-export const location = async (req, res) => {
-  const { lat, lng, memberId } = req.body;
-
-  getConnection((conn) => {
-    const sql1 = `INSERT INTO location (memberId, lat, lng ) VALUES ('${memberId}', '${lat}', '${lng}' ) ON DUPLICATE KEY UPDATE memberId = '${memberId}', lat = '${lat}', lng = '${lng}'`;
-
-    conn.query(sql1, (error, rows) => {
-      if (error) {
-        return res.status(StatusCodes.BAD_REQUEST).send(error);
-      }
-      return res.status(StatusCodes.OK).send("OK");
-    });
-
-    conn.release();
-  });
-};
-
-export const interestList = async (req, res) => {
   const { userId } = req.params;
 
   getConnection((conn) => {
-    const sql1 = `SELECT * FROM interestList WHERE memberId LIKE '${userId}'`;
+    const sql1 = `SELECT users.nickname, interestList.interestList FROM interestList JOIN users ON users.id = interestList.memberId WHERE interestList.memberId LIKE '${userId}'`;
 
     conn.query(sql1, (error, rows) => {
       const row = {
         ...rows[0],
         interestList: JSON.parse(rows[0].interestList),
       };
-      return res.status(StatusCodes.OK).send(row.interestList);
+      return res.status(StatusCodes.OK).send(row);
     });
 
     conn.release();

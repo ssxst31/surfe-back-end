@@ -4,17 +4,11 @@ import * as userController from "../controllers/userController.js";
 
 const router = express.Router();
 
-router.get("/profile", authMiddleware, userController.profile);
 router.get(
   "/userListByMeDistance",
   authMiddleware,
   userController.userListByMeDistance
 );
-router.post("/location", authMiddleware, userController.location);
-router.get(
-  "/interestList/:userId",
-  authMiddleware,
-  userController.interestList
-);
+router.get("/profile/:userId", authMiddleware, userController.profile);
 
 export default router;

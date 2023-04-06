@@ -5,6 +5,7 @@ import cookieParser from "cookie-parser";
 import express from "express";
 import authRouter from "./routes/authRouter.js";
 import userRouter from "./routes/userRouter.js";
+import myRouter from "./routes/myRouter.js";
 
 const app = express();
 
@@ -19,6 +20,7 @@ app.use(
     },
   })
 );
+
 app.use(cookieParser());
 app.use(express.json());
 app.use(bodyParser.urlencoded({ extended: true }));
@@ -26,5 +28,6 @@ app.use(bodyParser.json());
 
 app.use("/auth", authRouter);
 app.use("/user", userRouter);
+app.use("/my", myRouter);
 
 export default app;
