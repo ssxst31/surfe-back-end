@@ -56,7 +56,7 @@ export const signUp = async (req, res) => {
                   "token",
                   createToken({ email, nickname, memberId: rows2[0].id }),
                   {
-                    maxAge: 3600 * 24 * 7,
+                    maxAge: 1000 * 60 * 60 * 24 * 7,
                   }
                 )
                 .status(StatusCodes.OK)
@@ -108,7 +108,7 @@ export const login = async (req, res) => {
           } else {
             return res
               .cookie("token", createToken({ email, nickname, memberId }), {
-                maxAge: 3600 * 24 * 7,
+                maxAge: 1000 * 60 * 60 * 24 * 7,
               })
               .status(StatusCodes.OK)
               .send({
