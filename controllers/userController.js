@@ -12,7 +12,7 @@ export const userListByMeDistance = async (req, res) => {
           return console.log(error);
         }
 
-        const sql1 = `SELECT users.id, location.lat, location.lng, users.nickname FROM location JOIN users ON users.id = location.memberId`;
+        const sql1 = `SELECT users.id, users.profile, location.lat, location.lng, users.nickname FROM location JOIN users ON users.id = location.memberId`;
 
         conn.query(sql1, (error, rows) => {
           let userList = [];
@@ -29,7 +29,11 @@ export const userListByMeDistance = async (req, res) => {
                 5 &&
               rows1[0].id !== rows[i].id
             ) {
-              userList.push({ id: rows[i].id, nickname: rows[i].nickname });
+              userList.push({
+                id: rows[i].id,
+                nickname: rows[i].nickname,
+                profile: rows[i].profile,
+              });
             }
           }
 
