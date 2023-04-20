@@ -33,8 +33,14 @@ class WebSocket {
       console.log(`${data.nickname}님이 입장하였습니다.`);
 
       getConnection((conn) => {
-        const sql1 = `SELECT chat.id, chat.content, users.nickname, users.profile, chat.createAt, chat.roomName FROM chat JOIN users ON users.id = chat.memberId WHERE roomName LIKE '${roomName}'`;
+        const sql1 = `SELECT chat.id, users.user_id, chat.content, users.nickname, users.profile, chat.createAt, chat.roomName FROM chat JOIN users ON users.user_id = chat.memberId WHERE roomName LIKE '${roomName}'`;
         conn.query(sql1, (error, rows) => {
+          rows = rows.map((row) => {
+            let newObj = Object.assign({}, { ["userId"]: row["user_id"] }, row);
+            delete newObj["user_id"];
+            return newObj;
+          });
+
           return this.io
             .to(roomName)
             .emit("RECEIVE_MESSAGE", { chatList: rows });
@@ -49,9 +55,15 @@ class WebSocket {
       client.join(data.roomName);
 
       getConnection((conn) => {
-        const sql1 = `SELECT chat.id, chat.content, users.nickname, users.profile, chat.createAt, chat.roomName FROM chat JOIN users ON users.id = chat.memberId WHERE roomName LIKE '${data.roomName}'`;
+        const sql1 = `SELECT chat.id, users.user_id, chat.content, users.nickname, users.profile, chat.createAt, chat.roomName FROM chat JOIN users ON users.user_id = chat.memberId WHERE roomName LIKE '${data.roomName}'`;
 
         conn.query(sql1, (error, rows) => {
+          rows = rows.map((row) => {
+            let newObj = Object.assign({}, { ["userId"]: row["user_id"] }, row);
+            delete newObj["user_id"];
+            return newObj;
+          });
+
           return this.io
             .to(data.roomName)
             .emit("RECEIVE_PRIVATE_MESSAGE", { chatList: rows });
@@ -75,9 +87,19 @@ class WebSocket {
               return console.log(error);
             }
 
-            const sql1 = `SELECT chat.id, chat.content, users.nickname, users.profile, chat.createAt, chat.roomName FROM chat JOIN users ON users.id = chat.memberId WHERE roomName LIKE '${roomName}'`;
+            const sql1 = `SELECT chat.id, users.user_id, chat.content, users.nickname, users.profile, chat.createAt, chat.roomName FROM chat JOIN users ON users.user_id = chat.memberId WHERE roomName LIKE '${roomName}'`;
 
             conn.query(sql1, (error, rows) => {
+              rows = rows.map((row) => {
+                let newObj = Object.assign(
+                  {},
+                  { ["userId"]: row["user_id"] },
+                  row
+                );
+                delete newObj["user_id"];
+                return newObj;
+              });
+
               return this.io
                 .to(roomName)
                 .emit("RECEIVE_MESSAGE", { chatList: rows });
@@ -102,9 +124,19 @@ class WebSocket {
               return console.log(error);
             }
 
-            const sql1 = `SELECT chat.id, chat.content, users.nickname, chat.createAt, users.profile, chat.roomName FROM chat JOIN users ON users.id = chat.memberId WHERE roomName LIKE '${roomName}'`;
+            const sql1 = `SELECT chat.id, users.user_id, chat.content, users.nickname, chat.createAt, users.profile, chat.roomName FROM chat JOIN users ON users.user_id = chat.memberId WHERE roomName LIKE '${roomName}'`;
 
             conn.query(sql1, (error, rows) => {
+              rows = rows.map((row) => {
+                let newObj = Object.assign(
+                  {},
+                  { ["userId"]: row["user_id"] },
+                  row
+                );
+                delete newObj["user_id"];
+                return newObj;
+              });
+
               return this.io
                 .to(roomName)
                 .emit("RECEIVE_PRIVATE_MESSAGE", { chatList: rows });

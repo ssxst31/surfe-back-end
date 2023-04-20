@@ -4,7 +4,7 @@ import getConnection from "../routes/pool.js";
 
 export const profile = async (req, res) => {
   getConnection((conn) => {
-    const sql1 = `SELECT users.email, users.id, users.profile, location.lat, location.lng, users.nickname ,interestList.interestList, mbti.mbti, introduce.introduce FROM location JOIN users ON users.id = location.memberId JOIN mbti ON mbti.memberId = location.memberId JOIN interestList ON interestList.memberId = location.memberId JOIN introduce ON introduce.memberId = location.memberId WHERE location.memberId LIKE '${req.memberId}'`;
+    const sql1 = `SELECT users.email, users.user_id, users.profile, location.lat, location.lng, users.nickname ,interestList.interestList, mbti.mbti, introduce.introduce FROM location JOIN users ON users.user_id = location.memberId JOIN mbti ON mbti.memberId = location.memberId JOIN interestList ON interestList.memberId = location.memberId JOIN introduce ON introduce.memberId = location.memberId WHERE location.memberId LIKE '${req.memberId}'`;
 
     conn.query(sql1, (error, rows) => {
       const row = {
