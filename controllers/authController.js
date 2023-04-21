@@ -41,16 +41,16 @@ export const signUp = async (req, res) => {
 
             conn.query(
               `INSERT INTO location (memberId, lat, lng ) VALUES ('${
-                rows2[0].id
+                rows2[0].user_id
               }', '0', '0' );
               INSERT INTO interestList (memberId, interestList) VALUES ('${
-                rows2[0].id
+                rows2[0].user_id
               }', '${JSON.stringify(interestList)}' );
               INSERT INTO mbti (memberId, mbti ) VALUES ('${
-                rows2[0].id
+                rows2[0].user_id
               }', '${mbti}' );
               INSERT INTO introduce (memberId, introduce ) VALUES ('${
-                rows2[0].id
+                rows2[0].user_id
               }', '${introduce}' );`,
               (error) => {
                 if (error) {
@@ -60,7 +60,7 @@ export const signUp = async (req, res) => {
               res
                 .cookie(
                   "token",
-                  createToken({ email, nickname, memberId: rows2[0].id }),
+                  createToken({ email, nickname, memberId: rows2[0].user_id }),
                   {
                     maxAge: 1000 * 60 * 60 * 24 * 7,
                   }
