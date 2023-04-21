@@ -15,30 +15,65 @@ export const userListByMeDistance = async (req, res) => {
         const sql1 = `SELECT users.user_id, users.profile, location.lat, location.lng, users.nickname FROM location JOIN users ON users.user_id = location.memberId`;
 
         conn.query(sql1, (error, rows) => {
-          let userList = [];
+          const sql2 = `SELECT * FROM friendList WHERE senderId LIKE'${req.memberId}' OR receiverId LIKE'${req.memberId}'`;
 
-          for (let i = 0; i < rows.length; i++) {
-            if (
-              getDistance(
-                Number(rows1[0].lat),
-                Number(rows1[0].lng),
-                Number(rows[i].lat),
-                Number(rows[i].lng)
-              ) /
-                1000 <
-                5 &&
-              rows1[0].user_id !== rows[i].user_id
-            ) {
-              userList.push({
-                id: rows[i].user_id,
-                nickname: rows[i].nickname,
-                profile: rows[i].profile,
-              });
+          conn.query(sql2, (error, rows22) => {
+            if (error) {
+              return console.log(error);
             }
-          }
 
-          return res.status(StatusCodes.OK).send({
-            userList,
+            const userList = rows
+              .map((row, i) => {
+                if (
+                  getDistance(
+                    Number(rows1[0].lat),
+                    Number(rows1[0].lng),
+                    Number(rows[i].lat),
+                    Number(rows[i].lng)
+                  ) /
+                    1000 <
+                    5 &&
+                  rows1[0].user_id !== row.user_id
+                ) {
+                  const a = rows22.filter(
+                    (row22) => Number(row22.senderId) === row.user_id
+                  );
+                  const b = rows22.filter(
+                    (row22) => Number(row22.receiverId) === row.user_id
+                  );
+
+                  const hasMatchingIds = a.some((itemA) => {
+                    return b.some((itemB) => {
+                      return (
+                        itemA.senderId === itemB.receiverId &&
+                        itemA.receiverId === itemB.senderId
+                      );
+                    });
+                  });
+                  let friendStatus = "other";
+                  if (hasMatchingIds) friendStatus = "friend";
+                  else if (
+                    rows22.some(
+                      (row22) =>
+                        Number(row22.receiverId) === Number(row.user_id)
+                    )
+                  )
+                    friendStatus = "requesting";
+                  else friendStatus = "other";
+
+                  return {
+                    id: row.user_id,
+                    nickname: row.nickname,
+                    profile: row.profile,
+                    friendStatus: friendStatus,
+                  };
+                }
+              })
+              .filter((a) => a);
+
+            return res.status(StatusCodes.OK).send({
+              userList,
+            });
           });
         });
       }

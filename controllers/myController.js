@@ -40,7 +40,7 @@ export const upload = async (req, res) => {
   const aa = timestamp + "-" + decodeURIComponent(req.file.originalname);
 
   getConnection((conn) => {
-    const sql1 = `UPDATE users SET profile = '${aa}' WHERE id = '${req.memberId}'`;
+    const sql1 = `UPDATE users SET profile = '${aa}' WHERE user_id = '${req.memberId}'`;
 
     conn.query(sql1, (error, rows) => {
       if (error) {
@@ -50,5 +50,138 @@ export const upload = async (req, res) => {
     });
 
     conn.release();
+  });
+};
+
+export const addFriend = async (req, res) => {
+  const userId = req.memberId;
+  const receiverId = req.body.friendId;
+
+  const checkQuery = `SELECT * FROM friendList WHERE senderId = ${userId} AND receiverId = ${receiverId}`;
+  getConnection((conn) => {
+    conn.query(checkQuery, function (error, results) {
+      if (error) throw error;
+
+      // 친구 추가 요청이 없으면 요청을 수락한다
+      if (results.length === 0) {
+        const insertQuery = `INSERT INTO friendList (senderId, receiverId) VALUES (${userId}, ${receiverId})`;
+        conn.query(insertQuery, function (error, rows) {
+          if (error) throw error;
+
+          return res.status(StatusCodes.OK).send({
+            message: "OK",
+          });
+        });
+      } else {
+        return res.status(400).send({
+          message: "이미 친구 추가 요청을 보냈습니다.",
+        });
+      }
+    });
+  });
+};
+
+export const deleteFriend = async (req, res) => {
+  const userId = req.memberId;
+  const receiverId = req.body.friendId;
+
+  const checkQuery = `SELECT * FROM friendList WHERE senderId = ${userId} AND receiverId = ${receiverId}`;
+  getConnection((conn) => {
+    conn.query(checkQuery, function (error, results) {
+      if (error) throw error;
+
+      // 친구 추가 요청이 없으면 요청을 수락한다
+      if (results.length !== 0) {
+        const insertQuery = `DELETE from friendList WHERE senderId = '${userId}' AND receiverId = '${receiverId}'`;
+        conn.query(insertQuery, function (error, rows) {
+          if (error) throw error;
+
+          return res.status(StatusCodes.OK).send({
+            message: "OK",
+          });
+        });
+      } else {
+        return res.status(400).send({
+          message: "이미 친구가 아닙니다.",
+        });
+      }
+    });
+  });
+};
+
+export const friendList = async (req, res) => {
+  const userId = req.memberId;
+
+  const checkQuery = `SELECT users.user_id, friendList.senderId, friendList.receiverId, users.profile, users.nickname, mbti.mbti, introduce.introduce FROM friendList JOIN users ON users.user_id = friendList.receiverId JOIN mbti ON mbti.memberId = users.user_id JOIN introduce ON introduce.memberId = users.user_id WHERE senderId = '${userId}' OR receiverId = '${userId}'`;
+  getConnection((conn) => {
+    conn.query(checkQuery, function (error, rows) {
+      if (error) throw error;
+
+      const isSame = (a, b) => {
+        return a.senderId === b.receiverId && a.receiverId === b.senderId;
+      };
+
+      let sameIds = [];
+
+      for (let i = 0; i < rows.length; i++) {
+        for (let j = i + 1; j < rows.length; j++) {
+          if (isSame(rows[i], rows[j])) {
+            sameIds.push(rows[i]);
+            sameIds.push(rows[j]);
+          }
+        }
+      }
+
+      sameIds = sameIds.filter((item) => item.user_id !== userId);
+
+      return res.status(StatusCodes.OK).send(
+        sameIds.map((item) => ({
+          userId: item.receiverId,
+          profile: item.profile,
+          nickname: item.nickname,
+          mbti: item.mbti,
+          introduce: item.introduce,
+        }))
+      );
+    });
+  });
+};
+
+export const friendRequestList = async (req, res) => {
+  const userId = req.memberId;
+
+  const checkQuery = `SELECT users.user_id, friendList.senderId, friendList.receiverId, users.profile, users.nickname, mbti.mbti, introduce.introduce FROM friendList JOIN users ON users.user_id = friendList.senderId JOIN mbti ON mbti.memberId = users.user_id JOIN introduce ON introduce.memberId = users.user_id WHERE senderId = '${userId}' OR receiverId = '${userId}'`;
+  getConnection((conn) => {
+    conn.query(checkQuery, function (error, rows) {
+      if (error) throw error;
+
+      const removeDuplicates = (arr) => {
+        return arr.filter((item, index) => {
+          const isDuplicate =
+            arr.findIndex((el, idx) => {
+              return (
+                idx !== index &&
+                el.receiverId === item.senderId &&
+                el.senderId === item.receiverId
+              );
+            }) !== -1;
+          return !isDuplicate;
+        });
+      };
+
+      rows = removeDuplicates(rows).filter(
+        (a) => Number(a.receiverId) === userId
+      );
+
+      return res.status(StatusCodes.OK).send(
+        rows.map((item) => ({
+          userId: item.senderId,
+          profile: item.profile,
+          nickname: item.nickname,
+          mbti: item.mbti,
+          introduce: item.introduce,
+        }))
+      );
+    });
   });
 };
