@@ -78,6 +78,7 @@ export const addFriend = async (req, res) => {
         });
       }
     });
+    conn.release();
   });
 };
 
@@ -106,6 +107,7 @@ export const deleteFriend = async (req, res) => {
         });
       }
     });
+    conn.release();
   });
 };
 
@@ -144,6 +146,7 @@ export const friendList = async (req, res) => {
         }))
       );
     });
+    conn.release();
   });
 };
 
@@ -183,5 +186,6 @@ export const friendRequestList = async (req, res) => {
         }))
       );
     });
+    conn.release();
   });
 };
