@@ -91,7 +91,6 @@ export const deleteFriend = async (req, res) => {
     conn.query(checkQuery, function (error, results) {
       if (error) throw error;
 
-      // 친구 추가 요청이 없으면 요청을 수락한다
       if (results.length !== 0) {
         const insertQuery = `DELETE from friendList WHERE senderId = '${userId}' AND receiverId = '${receiverId}'`;
         conn.query(insertQuery, function (error, rows) {

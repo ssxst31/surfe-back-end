@@ -14,13 +14,9 @@ router.post(
   upload.single("image"),
   myController.upload
 );
-router.post("/addFriend", authMiddleware, myController.addFriend);
-router.post("/deleteFriend", authMiddleware, myController.deleteFriend);
-router.get("/friendList", authMiddleware, myController.friendList);
-router.get(
-  "/friendRequestList",
-  authMiddleware,
-  myController.friendRequestList
-);
+router.post("/friends", authMiddleware, myController.addFriend);
+router.post("/friends/cancel", authMiddleware, myController.deleteFriend);
+router.get("/friends", authMiddleware, myController.friendList);
+router.get("/friend-requests", authMiddleware, myController.friendRequestList);
 
 export default router;

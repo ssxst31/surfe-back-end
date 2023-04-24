@@ -27,7 +27,7 @@ app.use(bodyParser.urlencoded({ extended: true }));
 app.use(bodyParser.json());
 app.use("/uploads", express.static("uploads"));
 app.use("/auth", authRouter);
-app.use("/user", userRouter);
+app.use("/users", userRouter);
 app.use("/my", myRouter);
 
 export default app;
