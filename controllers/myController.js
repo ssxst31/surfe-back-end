@@ -149,7 +149,7 @@ export const friendList = async (req, res) => {
   });
 };
 
-export const friendRequestList = async (req, res) => {
+export const friendReceiveList = async (req, res) => {
   const userId = req.memberId;
 
   const checkQuery = `SELECT users.user_id, friendList.senderId, friendList.receiverId, users.profile, users.nickname, mbti.mbti, introduce.introduce FROM friendList JOIN users ON users.user_id = friendList.senderId JOIN mbti ON mbti.memberId = users.user_id JOIN introduce ON introduce.memberId = users.user_id WHERE senderId = '${userId}' OR receiverId = '${userId}'`;
@@ -178,6 +178,46 @@ export const friendRequestList = async (req, res) => {
       return res.status(StatusCodes.OK).send(
         rows.map((item) => ({
           userId: item.senderId,
+          profile: item.profile,
+          nickname: item.nickname,
+          mbti: item.mbti,
+          introduce: item.introduce,
+        }))
+      );
+    });
+    conn.release();
+  });
+};
+
+export const friendRequestList = async (req, res) => {
+  const userId = req.memberId;
+
+  const checkQuery = `SELECT users.user_id, friendList.senderId, friendList.receiverId, users.profile, users.nickname, mbti.mbti, introduce.introduce FROM friendList JOIN users ON users.user_id = friendList.receiverId JOIN mbti ON mbti.memberId = users.user_id JOIN introduce ON introduce.memberId = users.user_id WHERE senderId = '${userId}' OR receiverId = '${userId}'`;
+  getConnection((conn) => {
+    conn.query(checkQuery, function (error, rows) {
+      if (error) throw error;
+
+      const removeDuplicates = (arr) => {
+        return arr.filter((item, index) => {
+          const isDuplicate =
+            arr.findIndex((el, idx) => {
+              return (
+                idx !== index &&
+                el.receiverId === item.senderId &&
+                el.senderId === item.receiverId
+              );
+            }) !== -1;
+          return !isDuplicate;
+        });
+      };
+
+      rows = removeDuplicates(rows).filter(
+        (a) => Number(a.senderId) === userId
+      );
+
+      return res.status(StatusCodes.OK).send(
+        rows.map((item) => ({
+          userId: item.receiverId,
           profile: item.profile,
           nickname: item.nickname,
           mbti: item.mbti,
