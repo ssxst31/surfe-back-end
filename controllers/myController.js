@@ -228,3 +228,44 @@ export const friendRequestList = async (req, res) => {
     conn.release();
   });
 };
+
+export const chatList = async (req, res) => {
+  const userId = req.memberId;
+
+  const checkQuery = `SELECT users.profile, users.nickname, chat.content, chat.roomName, chat.createAt 
+  FROM chat 
+  JOIN users ON users.user_id = chat.memberId 
+  WHERE roomName NOT IN ("room1") AND (roomName LIKE '${userId}\\_%' OR roomName LIKE '%\\_${userId}%')
+  ORDER BY roomName ASC;`;
+
+  getConnection((conn) => {
+    conn.query(checkQuery, function (error, rows) {
+      if (error) throw error;
+
+      const groupByRoom = {};
+      rows.forEach((obj) => {
+        if (groupByRoom[obj.roomName]) {
+          groupByRoom[obj.roomName].push(obj);
+        } else {
+          groupByRoom[obj.roomName] = [obj];
+        }
+      });
+
+      const result = Object.values(groupByRoom).flatMap((objs) => {
+        objs.sort((a, b) => a.createAt - b.createAt);
+        return objs;
+      });
+
+      const result2 = [];
+
+      for (let i = 0; i < result.length; i++) {
+        if (result[i].roomName !== result[i + 1]?.roomName) {
+          result2.push(result[i]);
+        }
+      }
+
+      return res.status(StatusCodes.OK).send(result2);
+    });
+    conn.release();
+  });
+};

@@ -19,5 +19,6 @@ router.post("/friends/cancel", authMiddleware, myController.deleteFriend);
 router.get("/friends", authMiddleware, myController.friendList);
 router.get("/friend-requests", authMiddleware, myController.friendRequestList);
 router.get("/friend-receives", authMiddleware, myController.friendReceiveList);
+router.get("/chats", authMiddleware, myController.chatList);
 
 export default router;
