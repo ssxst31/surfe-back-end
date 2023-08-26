@@ -9,7 +9,7 @@ import myRouter from "./routes/myRouter.js";
 
 const app = express();
 
-const ALLOWED_HOSTS = ["http://localhost:3000", "https://www.surfe.store"];
+const ALLOWED_HOSTS = ["http://localhost:3000", "https://surfe.store"];
 
 app.use(
   cors({
