@@ -4,12 +4,30 @@ import getConnection from "../routes/pool.js";
 
 export const profile = async (req, res) => {
   getConnection((conn) => {
-    const sql1 = `SELECT users.email, users.user_id, users.profile, location.lat, location.lng, users.nickname ,interestList.interestList, mbti.mbti, introduce.introduce FROM location JOIN users ON users.user_id = location.memberId JOIN mbti ON mbti.memberId = location.memberId JOIN interestList ON interestList.memberId = location.memberId JOIN introduce ON introduce.memberId = location.memberId WHERE location.memberId LIKE '${req.memberId}'`;
+    const sql1 = `
+    SELECT DISTINCT
+    user.login_id,
+    user.id,
+    user.profile_image,
+    user.nickname,
+    user.mbti,
+    user.status_message,
+    interest.member_id,
+    interest.title
+    FROM user
+    join interest on user.id = interest.member_id
+    WHERE user.id LIKE '${req.memberId}'
+   `;
 
     conn.query(sql1, (error, rows) => {
       const row = {
-        ...rows[0],
-        interestList: JSON.parse(rows[0].interestList),
+        loginId: rows[0].login_id,
+        id: rows[0].id,
+        nickname: rows[0].nickname,
+        profile: rows[0].profile_image,
+        statusMessage: rows[0].status_message,
+        interestList: [rows[0].title, rows[1].title, rows[2].title],
+        mbti: rows[0].mbti,
       };
       return res.status(StatusCodes.OK).send(row);
     });
@@ -22,7 +40,9 @@ export const location = async (req, res) => {
   const { lat, lng } = req.body;
 
   getConnection((conn) => {
-    const sql1 = `INSERT INTO location (memberId, lat, lng ) VALUES ('${req.memberId}', '${lat}', '${lng}' ) ON DUPLICATE KEY UPDATE memberId = '${req.memberId}', lat = '${lat}', lng = '${lng}'`;
+    const sql1 = `UPDATE user 
+    SET lat = '${lat}', lng = '${lng}'
+    WHERE id = ${req.memberId}`;
 
     conn.query(sql1, (error, rows) => {
       if (error) {
@@ -40,7 +60,7 @@ export const upload = async (req, res) => {
   const aa = timestamp + "-" + decodeURIComponent(req.file.originalname);
 
   getConnection((conn) => {
-    const sql1 = `UPDATE users SET profile = '${aa}' WHERE user_id = '${req.memberId}'`;
+    const sql1 = `UPDATE users SET profile = '${aa}' WHERE login_id = '${req.memberId}'`;
 
     conn.query(sql1, (error, rows) => {
       if (error) {
@@ -57,16 +77,26 @@ export const addFriend = async (req, res) => {
   const userId = req.memberId;
   const receiverId = req.body.friendId;
 
-  const checkQuery = `SELECT * FROM friendList WHERE senderId = ${userId} AND receiverId = ${receiverId}`;
-  getConnection((conn) => {
-    conn.query(checkQuery, function (error, results) {
-      if (error) throw error;
+  const sql = `SELECT * 
+  FROM friend 
+  WHERE sender_id = '${userId}' 
+  AND receiver_id = '${receiverId}'`;
 
-      // 친구 추가 요청이 없으면 요청을 수락한다
-      if (results.length === 0) {
-        const insertQuery = `INSERT INTO friendList (senderId, receiverId) VALUES (${userId}, ${receiverId})`;
-        conn.query(insertQuery, function (error, rows) {
-          if (error) throw error;
+  getConnection((conn) => {
+    conn.query(sql, function (error, rows) {
+      if (error) {
+        return console.log(error);
+      }
+
+      if (rows.length === 0) {
+        const sql = `INSERT INTO friend
+        (sender_id, receiver_id) 
+        VALUES (${userId}, ${receiverId})`;
+
+        conn.query(sql, function (error, rows) {
+          if (error) {
+            return console.log(error);
+          }
 
           return res.status(StatusCodes.OK).send({
             message: "OK",
@@ -86,13 +116,13 @@ export const deleteFriend = async (req, res) => {
   const userId = req.memberId;
   const receiverId = req.body.friendId;
 
-  const checkQuery = `SELECT * FROM friendList WHERE senderId = ${userId} AND receiverId = ${receiverId}`;
+  const checkQuery = `SELECT * FROM friend WHERE sender_id = ${userId} AND receiver_id = ${receiverId}`;
   getConnection((conn) => {
     conn.query(checkQuery, function (error, results) {
       if (error) throw error;
 
       if (results.length !== 0) {
-        const insertQuery = `DELETE from friendList WHERE senderId = '${userId}' AND receiverId = '${receiverId}'`;
+        const insertQuery = `DELETE from friend WHERE sender_id = '${userId}' AND receiver_id = '${receiverId}'`;
         conn.query(insertQuery, function (error, rows) {
           if (error) throw error;
 
@@ -113,35 +143,54 @@ export const deleteFriend = async (req, res) => {
 export const friendList = async (req, res) => {
   const userId = req.memberId;
 
-  const checkQuery = `SELECT users.user_id, friendList.senderId, friendList.receiverId, users.profile, users.nickname, mbti.mbti, introduce.introduce FROM friendList JOIN users ON users.user_id = friendList.receiverId JOIN mbti ON mbti.memberId = users.user_id JOIN introduce ON introduce.memberId = users.user_id WHERE senderId = '${userId}' OR receiverId = '${userId}'`;
+  const sql = `
+  SELECT
+  user.login_id,
+  user.id,
+  user.profile_image,
+  user.nickname,
+  user.mbti,
+  user.status_message,
+  friend.receiver_id,
+  friend.sender_id
+  FROM friend
+  join user on user.id = friend.receiver_id
+  `;
+
   getConnection((conn) => {
-    conn.query(checkQuery, function (error, rows) {
+    conn.query(sql, function (error, rows) {
       if (error) throw error;
 
       const isSame = (a, b) => {
-        return a.senderId === b.receiverId && a.receiverId === b.senderId;
+        return a.sender_id === b.receiver_id && a.receiver_id === b.sender_id;
       };
 
-      let sameIds = [];
+      const findDuplicateItems = (data, userId) => {
+        const duplicateItems = [];
+        const seen = {};
 
-      for (let i = 0; i < rows.length; i++) {
-        for (let j = i + 1; j < rows.length; j++) {
-          if (isSame(rows[i], rows[j])) {
-            sameIds.push(rows[i]);
-            sameIds.push(rows[j]);
+        data.forEach((item, index) => {
+          for (let j = index + 1; j < data.length; j++) {
+            if (!seen[j] && isSame(item, data[j])) {
+              duplicateItems.push(item);
+              duplicateItems.push(data[j]);
+              seen[j] = true;
+            }
           }
-        }
-      }
+        });
 
-      sameIds = sameIds.filter((item) => item.user_id !== userId);
+        return duplicateItems.filter((item) => item.id !== userId);
+      };
+
+      const duplicateItems = findDuplicateItems(rows, userId);
 
       return res.status(StatusCodes.OK).send(
-        sameIds.map((item) => ({
-          userId: item.receiverId,
+        duplicateItems.map((item) => ({
+          userId: item.receiver_id,
           profile: item.profile,
           nickname: item.nickname,
           mbti: item.mbti,
-          introduce: item.introduce,
+          introduce: item.status_message,
         }))
       );
     });
@@ -152,36 +201,47 @@ export const friendList = async (req, res) => {
 export const friendReceiveList = async (req, res) => {
   const userId = req.memberId;
 
-  const checkQuery = `SELECT users.user_id, friendList.senderId, friendList.receiverId, users.profile, users.nickname, mbti.mbti, introduce.introduce FROM friendList JOIN users ON users.user_id = friendList.senderId JOIN mbti ON mbti.memberId = users.user_id JOIN introduce ON introduce.memberId = users.user_id WHERE senderId = '${userId}' OR receiverId = '${userId}'`;
+  const sql = `
+  SELECT
+  user.login_id,
+  user.id,
+  user.profile_image,
+  user.nickname,
+  user.mbti,
+  user.status_message,
+  friend.receiver_id,
+  friend.sender_id
+  FROM friend
+  join user on user.id = friend.receiver_id
+  `;
   getConnection((conn) => {
-    conn.query(checkQuery, function (error, rows) {
+    conn.query(sql, function (error, rows) {
       if (error) throw error;
 
       const removeDuplicates = (arr) => {
         return arr.filter((item, index) => {
-          const isDuplicate =
-            arr.findIndex((el, idx) => {
-              return (
-                idx !== index &&
-                el.receiverId === item.senderId &&
-                el.senderId === item.receiverId
-              );
-            }) !== -1;
+          const isDuplicate = arr.some((el, idx) => {
+            return (
+              idx !== index &&
+              el.receiver_id === item.sender_id &&
+              el.sender_id === item.receiver_id
+            );
+          });
           return !isDuplicate;
         });
       };
 
       rows = removeDuplicates(rows).filter(
-        (a) => Number(a.receiverId) === userId
+        (a) => Number(a.receiver_id) === userId
       );
 
       return res.status(StatusCodes.OK).send(
         rows.map((item) => ({
-          userId: item.senderId,
+          userId: item.sender_id,
           profile: item.profile,
           nickname: item.nickname,
           mbti: item.mbti,
-          introduce: item.introduce,
+          introduce: item.status_message,
         }))
       );
     });
@@ -192,36 +252,48 @@ export const friendReceiveList = async (req, res) => {
 export const friendRequestList = async (req, res) => {
   const userId = req.memberId;
 
-  const checkQuery = `SELECT users.user_id, friendList.senderId, friendList.receiverId, users.profile, users.nickname, mbti.mbti, introduce.introduce FROM friendList JOIN users ON users.user_id = friendList.receiverId JOIN mbti ON mbti.memberId = users.user_id JOIN introduce ON introduce.memberId = users.user_id WHERE senderId = '${userId}' OR receiverId = '${userId}'`;
+  const sql = `
+  SELECT
+  user.login_id,
+  user.id,
+  user.profile_image,
+  user.nickname,
+  user.mbti,
+  user.status_message,
+  friend.receiver_id,
+  friend.sender_id
+  FROM friend
+  join user on user.id = friend.receiver_id
+  `;
+
   getConnection((conn) => {
-    conn.query(checkQuery, function (error, rows) {
+    conn.query(sql, function (error, rows) {
       if (error) throw error;
 
       const removeDuplicates = (arr) => {
         return arr.filter((item, index) => {
-          const isDuplicate =
-            arr.findIndex((el, idx) => {
-              return (
+          return (
+            arr.findIndex(
+              (el, idx) =>
                 idx !== index &&
-                el.receiverId === item.senderId &&
-                el.senderId === item.receiverId
-              );
-            }) !== -1;
-          return !isDuplicate;
+                el.receiver_id === item.sender_id &&
+                el.sender_id === item.receiver_id
+            ) === -1
+          );
         });
       };
 
       rows = removeDuplicates(rows).filter(
-        (a) => Number(a.senderId) === userId
+        (a) => Number(a.sender_id) === userId
       );
 
       return res.status(StatusCodes.OK).send(
         rows.map((item) => ({
-          userId: item.receiverId,
+          userId: item.receiver_id,
           profile: item.profile,
           nickname: item.nickname,
           mbti: item.mbti,
-          introduce: item.introduce,
+          introduce: item.status_message,
         }))
       );
     });
@@ -230,42 +302,52 @@ export const friendRequestList = async (req, res) => {
 };
 
 export const chatList = async (req, res) => {
-  const userId = req.memberId;
-
-  const checkQuery = `SELECT users.profile, users.nickname, chat.content, chat.roomName, chat.createAt 
-  FROM chat 
-  JOIN users ON users.user_id = chat.memberId 
-  WHERE roomName NOT IN ("room1") AND (roomName LIKE '${userId}\\_%' OR roomName LIKE '%\\_${userId}%')
-  ORDER BY roomName ASC;`;
+  const checkQuery = `SELECT * FROM test.room  WHERE NOT room_id IN ('room1');`;
 
   getConnection((conn) => {
     conn.query(checkQuery, function (error, rows) {
       if (error) throw error;
-
-      const groupByRoom = {};
-      rows.forEach((obj) => {
-        if (groupByRoom[obj.roomName]) {
-          groupByRoom[obj.roomName].push(obj);
-        } else {
-          groupByRoom[obj.roomName] = [obj];
-        }
+      rows = rows.map((row) => {
+        return {
+          id: row.id,
+          roomName: row.room_id,
+          lastMessage: row.last_message,
+          updatedAt: row.updated_at,
+        };
       });
-
-      const result = Object.values(groupByRoom).flatMap((objs) => {
-        objs.sort((a, b) => a.createAt - b.createAt);
-        return objs;
-      });
-
-      const result2 = [];
-
-      for (let i = 0; i < result.length; i++) {
-        if (result[i].roomName !== result[i + 1]?.roomName) {
-          result2.push(result[i]);
-        }
-      }
-
-      return res.status(StatusCodes.OK).send(result2);
+      return res.status(StatusCodes.OK).send(rows);
     });
+    conn.release();
+  });
+};
+
+export const loadChat = async (req, res) => {
+  const { limit, roomName } = req.query;
+
+  getConnection((conn) => {
+    const sql1 = `
+    SELECT chat.id, chat.message, chat.created_at, chat.sender_id, user.nickname
+    FROM chat 
+    JOIN user on user.id = chat.sender_id
+    WHERE room_id LIKE '${roomName ?? "room1"}' 
+    ORDER BY chat.id DESC 
+    LIMIT ${limit};
+    `;
+
+    conn.query(sql1, (error, rows) => {
+      rows = rows.map((row) => {
+        return {
+          id: row.id,
+          message: row.message,
+          createdAt: row.created_at,
+          senderId: row.sender_id,
+          nickname: row.nickname,
+        };
+      });
+
+      return res.status(StatusCodes.OK).send(rows.reverse());
+    });
+
     conn.release();
   });
 };

@@ -20,5 +20,6 @@ router.get("/friends", authMiddleware, myController.friendList);
 router.get("/friend-requests", authMiddleware, myController.friendRequestList);
 router.get("/friend-receives", authMiddleware, myController.friendReceiveList);
 router.get("/chats", authMiddleware, myController.chatList);
+router.get("/chat", authMiddleware, myController.loadChat);
 
 export default router;

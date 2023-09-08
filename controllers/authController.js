@@ -7,64 +7,60 @@ import getConnection from "../routes/pool.js";
 import { createHashedPassword, verifyPassword } from "../utils/hash.js";
 
 export const signUp = async (req, res) => {
-  const { email, password, nickname, interestList, mbti, introduce } = req.body;
+  const { id, password, nickname, interestList, mbti, statusMessage } =
+    req.body;
 
   const { hashedPassword, salt } = await createHashedPassword(password);
 
-  const { isValid, message } = loginValidator({ email, password });
+  const { isValid, message } = loginValidator({ id, password });
 
   if (!isValid) {
     return res.status(StatusCodes.BAD_REQUEST).send(createError(message));
   }
 
   getConnection((conn) => {
-    const sql1 = `SELECT SQL_CALC_FOUND_ROWS * FROM users WHERE email LIKE '${email}';`;
+    const sql = `SELECT sql_calc_found_rows * from USER 
+    WHERE login_id LIKE '${id}';`;
 
-    conn.query(sql1, (error, rows) => {
+    conn.query(sql, (error, rows) => {
       if (rows.length > 0) {
         return res.status(StatusCodes.CONFLICT).send({
           message: USER_VALIDATION_ERRORS.EXIST_USER,
         });
       } else {
-        const dsa = `INSERT INTO users ( nickname, email, password, salt ) VALUES ('${nickname}', '${email}', '${hashedPassword}', '${salt}');`;
+        const sql = `INSERT INTO USER(nickname, login_id, password, salt, mbti, status_message)
+        VALUES ('${nickname}', '${id}', '${hashedPassword}', '${salt}', '${mbti}', '${statusMessage}');`;
 
-        conn.query(dsa, (error) => {
+        conn.query(sql, (error, rows) => {
           if (error) {
             return console.log(error);
           }
 
-          const sql1 = `SELECT SQL_CALC_FOUND_ROWS * FROM users WHERE email LIKE '${email}';`;
-          conn.query(sql1, (error, rows2) => {
+          const sql = `SELECT id FROM test.user WHERE login_id LIKE '${id}';`;
+
+          conn.query(sql, (error) => {
             if (error) {
               return console.log(error);
             }
 
+            const sql = `INSERT INTO test.interest(title, member_id)
+            VALUES 
+            ('${interestList[0]}', '${rows.insertId}'),
+            ('${interestList[1]}', '${rows.insertId}'),
+            ('${interestList[2]}', '${rows.insertId}')
+            ;`;
+
             conn.query(
-              `INSERT INTO location (memberId, lat, lng ) VALUES ('${
-                rows2[0].user_id
-              }', '0', '0' );
-              INSERT INTO interestList (memberId, interestList) VALUES ('${
-                rows2[0].user_id
-              }', '${JSON.stringify(interestList)}' );
-              INSERT INTO mbti (memberId, mbti ) VALUES ('${
-                rows2[0].user_id
-              }', '${mbti}' );
-              INSERT INTO introduce (memberId, introduce ) VALUES ('${
-                rows2[0].user_id
-              }', '${introduce}' );`,
-              (error) => {
+              sql,
+              (error, rows) => {
                 if (error) {
                   return console.log(error);
                 }
               },
               res
-                .cookie(
-                  "token",
-                  createToken({ email, nickname, memberId: rows2[0].user_id }),
-                  {
-                    maxAge: 1000 * 60 * 60 * 24 * 7,
-                  }
-                )
+                .cookie("token", createToken({ memberId: rows.insertId }), {
+                  maxAge: 1000 * 60 * 60 * 24 * 7,
+                })
                 .status(StatusCodes.OK)
                 .send({
                   message: "계정이 성공적으로 생성되었습니다",
@@ -80,16 +76,16 @@ export const signUp = async (req, res) => {
 };
 
 export const login = async (req, res) => {
-  const { email, password } = req.body;
+  const { id, password } = req.body;
 
-  const { isValid, message } = loginValidator({ email, password });
+  const { isValid, message } = loginValidator({ id, password });
 
   if (!isValid) {
     return res.status(StatusCodes.BAD_REQUEST).send(createError(message));
   }
 
   getConnection((conn) => {
-    const query = `SELECT SQL_CALC_FOUND_ROWS * FROM users WHERE email LIKE '${email}';`;
+    const query = `SELECT SQL_CALC_FOUND_ROWS * FROM user WHERE login_id LIKE '${id}';`;
 
     conn.query(query, async (error, rows) => {
       if (error) throw error;
@@ -100,8 +96,7 @@ export const login = async (req, res) => {
           });
         } else {
           const row = rows[0];
-          const memberId = row.user_id;
-          const nickname = row.nickname;
+
           const verified = await verifyPassword(
             password,
             row.salt,
@@ -113,7 +108,7 @@ export const login = async (req, res) => {
             });
           } else {
             return res
-              .cookie("token", createToken({ email, nickname, memberId }), {
+              .cookie("token", createToken({ memberId: row.id }), {
                 maxAge: 1000 * 60 * 60 * 24 * 7,
               })
               .status(StatusCodes.OK)

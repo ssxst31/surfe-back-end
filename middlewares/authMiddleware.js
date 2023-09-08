@@ -17,7 +17,7 @@ export const authMiddleware = async (req, res, next) => {
     const user = verifyToken(token);
 
     getConnection((conn) => {
-      const query = `SELECT SQL_CALC_FOUND_ROWS * FROM users WHERE email LIKE '%${user.email}%';`;
+      const query = `SELECT SQL_CALC_FOUND_ROWS * FROM user WHERE id LIKE '%${user.memberId}%';`;
       conn.query(query, async (error, rows) => {
         if (error) throw error;
         if (!rows.length) {
