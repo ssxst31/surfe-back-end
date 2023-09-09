@@ -183,14 +183,13 @@ export const friendList = async (req, res) => {
       };
 
       const duplicateItems = findDuplicateItems(rows, userId);
-
       return res.status(StatusCodes.OK).send(
         duplicateItems.map((item) => ({
           userId: item.receiver_id,
           profile: item.profile,
           nickname: item.nickname,
           mbti: item.mbti,
-          introduce: item.status_message,
+          statusMessage: item.status_message,
         }))
       );
     });
@@ -241,7 +240,7 @@ export const friendReceiveList = async (req, res) => {
           profile: item.profile,
           nickname: item.nickname,
           mbti: item.mbti,
-          introduce: item.status_message,
+          statusMessage: item.status_message,
         }))
       );
     });
@@ -293,7 +292,7 @@ export const friendRequestList = async (req, res) => {
           profile: item.profile,
           nickname: item.nickname,
           mbti: item.mbti,
-          introduce: item.status_message,
+          statusMessage: item.status_message,
         }))
       );
     });
@@ -302,7 +301,7 @@ export const friendRequestList = async (req, res) => {
 };
 
 export const chatList = async (req, res) => {
-  const checkQuery = `SELECT * FROM test.room  WHERE NOT room_id IN ('room1');`;
+  const checkQuery = `SELECT * FROM room  WHERE NOT room_id IN ('room1');`;
 
   getConnection((conn) => {
     conn.query(checkQuery, function (error, rows) {
@@ -312,7 +311,7 @@ export const chatList = async (req, res) => {
           id: row.id,
           roomName: row.room_id,
           lastMessage: row.last_message,
-          updatedAt: row.updated_at,
+          updatedAt: row.updated_at ?? row.created_at,
         };
       });
       return res.status(StatusCodes.OK).send(rows);

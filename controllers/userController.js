@@ -9,7 +9,7 @@ export const userListByMeDistance = async (req, res) => {
     SELECT 
     * 
     FROM
-    test.user;`;
+    user;`;
 
     conn.query(sql, (error, rows) => {
       const me = rows.find((row) => row.id === req.memberId);

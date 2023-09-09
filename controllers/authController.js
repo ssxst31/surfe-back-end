@@ -19,7 +19,7 @@ export const signUp = async (req, res) => {
   }
 
   getConnection((conn) => {
-    const sql = `SELECT sql_calc_found_rows * from USER 
+    const sql = `SELECT sql_calc_found_rows * from user
     WHERE login_id LIKE '${id}';`;
 
     conn.query(sql, (error, rows) => {
@@ -28,7 +28,7 @@ export const signUp = async (req, res) => {
           message: USER_VALIDATION_ERRORS.EXIST_USER,
         });
       } else {
-        const sql = `INSERT INTO USER(nickname, login_id, password, salt, mbti, status_message)
+        const sql = `INSERT INTO user(nickname, login_id, password, salt, mbti, status_message)
         VALUES ('${nickname}', '${id}', '${hashedPassword}', '${salt}', '${mbti}', '${statusMessage}');`;
 
         conn.query(sql, (error, rows) => {
@@ -36,14 +36,14 @@ export const signUp = async (req, res) => {
             return console.log(error);
           }
 
-          const sql = `SELECT id FROM test.user WHERE login_id LIKE '${id}';`;
+          const sql = `SELECT id FROM user WHERE login_id LIKE '${id}';`;
 
           conn.query(sql, (error) => {
             if (error) {
               return console.log(error);
             }
 
-            const sql = `INSERT INTO test.interest(title, member_id)
+            const sql = `INSERT INTO interest(title, member_id)
             VALUES 
             ('${interestList[0]}', '${rows.insertId}'),
             ('${interestList[1]}', '${rows.insertId}'),

@@ -89,16 +89,18 @@ class WebSocket {
     });
 
     client.on("SEND_MESSAGE", (data) => {
-      const { content, memberId } = data;
-      const roomName = data.roomName;
+      const { content, memberId, roomName } = data;
+
       client.join(data.roomName);
       getConnection((conn) => {
-        const sql = `INSERT INTO room (room_id, last_message)
-        VALUES ('${roomName}', '${content}')
-        ON DUPLICATE KEY 
-        UPDATE last_message='${content}', updated_at=NOW();`;
+        const sql = `INSERT INTO room (room_id, last_message, created_at)
+        VALUES ('${roomName}', '${content}', CONVERT_TZ(NOW(), 'GMT', 'Asia/Seoul'))
+        ON DUPLICATE KEY UPDATE last_message='${content}', updated_at=CONVERT_TZ(NOW(), 'GMT', 'Asia/Seoul');`;
 
         conn.query(sql, (error, rows) => {
+          if (error) {
+            return console.log(error);
+          }
           conn.query(
             "INSERT INTO chat ( message, sender_id, created_at, room_id ) VALUES ?;",
             [[[content, memberId, new Date(), roomName]]],
