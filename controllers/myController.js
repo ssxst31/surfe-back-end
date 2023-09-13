@@ -304,19 +304,24 @@ export const friendRequestList = async (req, res) => {
 };
 
 export const chatList = async (req, res) => {
+  const userId = req.memberId;
+
   const checkQuery = `SELECT * FROM room  WHERE NOT room_id IN ('room1');`;
 
   getConnection((conn) => {
     conn.query(checkQuery, function (error, rows) {
       if (error) throw error;
-      rows = rows.map((row) => {
-        return {
-          id: row.id,
-          roomName: row.room_id,
-          lastMessage: row.last_message,
-          updatedAt: row.updated_at ?? row.created_at,
-        };
-      });
+
+      rows = rows
+        .filter((item) => item.room_id.includes(userId))
+        .map((row) => {
+          return {
+            id: row.id,
+            roomName: row.room_id,
+            lastMessage: row.last_message,
+            updatedAt: row.updated_at ?? row.created_at,
+          };
+        });
       return res.status(StatusCodes.OK).send(rows);
     });
     conn.release();
