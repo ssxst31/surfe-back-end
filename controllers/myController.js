@@ -190,6 +190,7 @@ export const friendList = async (req, res) => {
           nickname: item.nickname,
           mbti: item.mbti,
           statusMessage: item.status_message,
+          profileImage: item.profile_image,
         }))
       );
     });
@@ -241,6 +242,7 @@ export const friendReceiveList = async (req, res) => {
           nickname: item.nickname,
           mbti: item.mbti,
           statusMessage: item.status_message,
+          profileImage: item.profile_image,
         }))
       );
     });
@@ -293,6 +295,7 @@ export const friendRequestList = async (req, res) => {
           nickname: item.nickname,
           mbti: item.mbti,
           statusMessage: item.status_message,
+          profileImage: item.profile_image,
         }))
       );
     });
