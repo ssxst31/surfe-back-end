@@ -24,7 +24,7 @@ export const profile = async (req, res) => {
         loginId: rows[0].login_id,
         id: rows[0].id,
         nickname: rows[0].nickname,
-        profile: rows[0].profile_image,
+        profileImage: rows[0].profile_image,
         statusMessage: rows[0].status_message,
         interestList: [rows[0].title, rows[1].title, rows[2].title],
         mbti: rows[0].mbti,
@@ -325,7 +325,7 @@ export const loadChat = async (req, res) => {
 
   getConnection((conn) => {
     const sql1 = `
-    SELECT chat.id, chat.message, chat.created_at, chat.sender_id, user.nickname
+    SELECT chat.id, chat.message, chat.created_at, chat.sender_id, user.nickname, user.profile_image
     FROM chat 
     JOIN user on user.id = chat.sender_id
     WHERE room_id LIKE '${roomName ?? "room1"}' 
@@ -341,6 +341,7 @@ export const loadChat = async (req, res) => {
           createdAt: row.created_at,
           senderId: row.sender_id,
           nickname: row.nickname,
+          profileImage: row.profile_image,
         };
       });
 

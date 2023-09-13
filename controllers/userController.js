@@ -64,6 +64,7 @@ export const userListByMeDistance = async (req, res) => {
               loginId: row.login_id,
               nickname: row.nickname,
               profile: row.profile,
+              profileImage: row.profile_image,
               friendStatus: friendStatus,
             };
           })
@@ -100,7 +101,7 @@ export const profile = async (req, res) => {
         loginId: rows[0].login_id,
         id: rows[0].id,
         nickname: rows[0].nickname,
-        profile: rows[0].profile_image,
+        profileImage: rows[0].profile_image,
         statusMessage: rows[0].status_message,
         interestList: [rows[0].title, rows[1].title, rows[2].title],
         mbti: rows[0].mbti,

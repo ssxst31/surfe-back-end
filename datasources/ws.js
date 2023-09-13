@@ -34,7 +34,7 @@ class WebSocket {
       getConnection((conn) => {
         const pageSize = 30;
         const sql1 = `
-        SELECT chat.id, chat.message, chat.created_at, chat.room_id, chat.sender_id, user.nickname
+        SELECT chat.id, chat.message, chat.created_at, chat.room_id, chat.sender_id, user.nickname, user.profile_image
         FROM chat 
         JOIN user on user.id = chat.sender_id
         WHERE room_id LIKE '${roomName}' 
@@ -50,6 +50,7 @@ class WebSocket {
               createdAt: row.created_at,
               senderId: row.sender_id,
               nickname: row.nickname,
+              profileImage: row.profile_image,
             };
           });
 
@@ -111,7 +112,7 @@ class WebSocket {
               const pageSize = 30; // 페이지당 표시할 항목 수
 
               const sql1 = `
-              SELECT chat.id, chat.message, chat.created_at, chat.room_id, chat.sender_id, user.nickname
+              SELECT chat.id, chat.message, chat.created_at, chat.room_id, chat.sender_id, user.nickname, user.profile_image
               FROM chat 
               JOIN user on user.id = chat.sender_id
               WHERE room_id LIKE '${roomName}' 
@@ -126,6 +127,7 @@ class WebSocket {
                     createdAt: row.created_at,
                     senderId: row.sender_id,
                     nickname: row.nickname,
+                    profileImage: row.profile_image,
                   };
                 });
                 return this.io
