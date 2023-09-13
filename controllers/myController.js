@@ -212,7 +212,7 @@ export const friendReceiveList = async (req, res) => {
   friend.receiver_id,
   friend.sender_id
   FROM friend
-  join user on user.id = friend.receiver_id
+  join user on user.id = friend.sender_id
   `;
   getConnection((conn) => {
     conn.query(sql, function (error, rows) {
