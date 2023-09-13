@@ -65,6 +65,7 @@ export const userListByMeDistance = async (req, res) => {
               nickname: row.nickname,
               profile: row.profile,
               profileImage: row.profile_image,
+              statusMessage: row.status_message,
               friendStatus: friendStatus,
             };
           })
