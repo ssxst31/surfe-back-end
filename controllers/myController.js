@@ -310,7 +310,14 @@ export const friendRequestList = async (req, res) => {
 export const chatList = async (req, res) => {
   const userId = req.memberId;
 
-  const checkQuery = `SELECT * FROM room  WHERE NOT room_id IN ('room1');`;
+  const checkQuery = `SELECT *
+  FROM room
+  WHERE room_id NOT IN ('room1')
+  ORDER BY
+  CASE
+  WHEN updated_at IS NULL THEN created_at
+  ELSE updated_at
+  END DESC;`;
 
   getConnection((conn) => {
     conn.query(checkQuery, function (error, rows) {
