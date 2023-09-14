@@ -162,7 +162,11 @@ export const friendList = async (req, res) => {
       if (error) throw error;
 
       const isSame = (a, b) => {
-        return a.sender_id === b.receiver_id && a.receiver_id === b.sender_id;
+        return (
+          a.sender_id === b.receiver_id &&
+          a.receiver_id === b.sender_id &&
+          (b.sender_id === userId || a.sender_id === userId)
+        );
       };
 
       const findDuplicateItems = (data, userId) => {
