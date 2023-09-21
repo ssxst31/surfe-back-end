@@ -8,7 +8,7 @@ export const loginValidator = (loginForm) => {
     };
   }
 
-  if (!validator.isLength(loginForm.id, { min: 8 })) {
+  if (!validator.isLength(loginForm.id, { min: 5 })) {
     return {
       isValid: false,
       message: USER_VALIDATION_ERRORS.INVALID_EMAIL,
