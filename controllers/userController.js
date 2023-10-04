@@ -14,7 +14,7 @@ export const userListByMeDistance = async (req, res) => {
     conn.query(sql, (error, rows) => {
       const me = rows.find((row) => row.id === req.memberId);
       const sql2 = `SELECT * FROM friend WHERE sender_id LIKE'${req.memberId}' OR receiver_id LIKE'${req.memberId}'`;
-
+      console.log(1);
       conn.query(sql2, (error, rows22) => {
         if (error) {
           return console.log(error);
