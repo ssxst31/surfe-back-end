@@ -8,7 +8,7 @@ function isProduction() {
 
 dotenv.config();
 
-const dbConfig = isProduction()
+const dbConfig = 2
   ? {
       uri: process.env.DATABASE_URL,
       multipleStatements: true,

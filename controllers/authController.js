@@ -60,6 +60,10 @@ export const signUp = async (req, res) => {
               res
                 .cookie("token", createToken({ memberId: rows.insertId }), {
                   maxAge: 1000 * 60 * 60 * 24 * 7,
+                  secure: true,
+                  httpOnly: true,
+                  samesite: "none",
+                  domain: ".surfe.store",
                 })
                 .status(StatusCodes.OK)
                 .send({
@@ -110,6 +114,10 @@ export const login = async (req, res) => {
             return res
               .cookie("token", createToken({ memberId: row.id }), {
                 maxAge: 1000 * 60 * 60 * 24 * 7,
+                secure: true,
+                httpOnly: true,
+                samesite: "none",
+                domain: ".surfe.store",
               })
               .status(StatusCodes.OK)
               .send({
@@ -125,5 +133,5 @@ export const login = async (req, res) => {
 };
 
 export const logout = async (req, res) => {
-  return res.clearCookie("token").end();
+  return res.clearCookie("token", { domain: ".surfe.store" }).end();
 };
