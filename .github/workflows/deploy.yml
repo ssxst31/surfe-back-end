@@ -58,4 +58,4 @@ jobs:
           --application-name test-codeDeploy
           --deployment-config-name CodeDeployDefault.OneAtATime
           --deployment-group-name test-deploy-group
-          --s3-location bucket=hara-build,bundleType=zip,key=deploy/hara.zip
+          --s3-location bucket=${{ secrets.BUCKET }},bundleType=zip,key=deploy/hara.zip
