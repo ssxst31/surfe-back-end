@@ -1,9 +1,9 @@
-import { StatusCodes } from "http-status-codes";
+const { StatusCodes } = require("http-status-codes");
 
-import getConnection from "../routes/pool.js";
-import { getDistance } from "../utils/map.js";
+const getConnection = require("../routes/pool.js");
+const { getDistance } = require("../utils/map.js");
 
-export const userListByMeDistance = async (req, res) => {
+const userListByMeDistance = async (req, res) => {
   getConnection((conn) => {
     const sql = `
     SELECT 
@@ -78,7 +78,7 @@ export const userListByMeDistance = async (req, res) => {
   });
 };
 
-export const profile = async (req, res) => {
+const profile = async (req, res) => {
   const { userId } = req.params;
 
   getConnection((conn) => {
@@ -112,4 +112,9 @@ export const profile = async (req, res) => {
 
     conn.release();
   });
+};
+
+module.exports = {
+  userListByMeDistance,
+  profile,
 };

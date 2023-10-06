@@ -1,11 +1,17 @@
-import jwt from "jsonwebtoken";
+const jwt = require("jsonwebtoken");
 
-export const JWT_TOKEN_SALT = "jwtTokenSalt";
+const JWT_TOKEN_SALT = "jwtTokenSalt";
 
-export const createToken = (value) => {
+const createToken = (value) => {
   return jwt.sign(value, JWT_TOKEN_SALT);
 };
 
-export const verifyToken = (token) => {
+const verifyToken = (token) => {
   return jwt.verify(token, JWT_TOKEN_SALT);
+};
+
+module.exports = {
+  JWT_TOKEN_SALT,
+  createToken,
+  verifyToken,
 };

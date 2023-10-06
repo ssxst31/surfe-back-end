@@ -1,10 +1,10 @@
-import { StatusCodes } from "http-status-codes";
+const { StatusCodes } = require("http-status-codes");
 
-import getConnection from "../routes/pool.js";
-import { createError } from "../utils/responseUtils.js";
-import { USER_VALIDATION_ERRORS } from "../utils/validator.js";
+const getConnection = require("../routes/pool.js");
+const { createError } = require("../utils/responseUtils.js");
+const { USER_VALIDATION_ERRORS } = require("../utils/validator.js");
 
-export const createUser = async ({ nickname, email, password }) => {
+const createUser = async ({ nickname, email, password }) => {
   getConnection((conn) => {
     conn.query("INSERT INTO users ( nickname, email, password ) VALUES ?;", [
       [[nickname, email, password]],
@@ -20,7 +20,7 @@ export const createUser = async ({ nickname, email, password }) => {
   });
 };
 
-export const findUser = async (predicate) => {
+const findUser = async (predicate) => {
   let dsa = [];
   getConnection((conn) => {
     const sql1 = `SELECT SQL_CALC_FOUND_ROWS * FROM users WHERE nickname LIKE '%${predicate}%';`;
@@ -33,4 +33,9 @@ export const findUser = async (predicate) => {
 
     conn.release();
   });
+};
+
+module.exports = {
+  createUser,
+  findUser,
 };

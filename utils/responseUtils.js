@@ -1,11 +1,16 @@
-export const createResponse = (data) => {
+const createResponse = (data) => {
   return {
     data,
   };
 };
 
-export const createError = (message) => {
+const createError = (message) => {
   return {
     message,
   };
+};
+
+module.exports = {
+  createResponse,
+  createError,
 };

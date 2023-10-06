@@ -1,11 +1,11 @@
-import cors from "cors";
-import bodyParser from "body-parser";
-import cookieParser from "cookie-parser";
+const cors = require("cors");
+const bodyParser = require("body-parser");
+const cookieParser = require("cookie-parser");
 
-import express from "express";
-import authRouter from "./routes/authRouter.js";
-import userRouter from "./routes/userRouter.js";
-import myRouter from "./routes/myRouter.js";
+const express = require("express");
+const authRouter = require("./routes/authRouter.js");
+const userRouter = require("./routes/userRouter.js");
+const myRouter = require("./routes/myRouter.js");
 
 const app = express();
 
@@ -30,4 +30,4 @@ app.use("/auth", authRouter);
 app.use("/users", userRouter);
 app.use("/my", myRouter);
 
-export default app;
+module.exports = app;

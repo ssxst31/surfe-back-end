@@ -1,6 +1,6 @@
-import validator from "validator";
+const validator = require("validator");
 
-export const loginValidator = (loginForm) => {
+const loginValidator = (loginForm) => {
   if (Object.values(loginForm).some((v) => !v)) {
     return {
       isValid: false,
@@ -27,7 +27,7 @@ export const loginValidator = (loginForm) => {
   };
 };
 
-export const USER_VALIDATION_ERRORS = {
+const USER_VALIDATION_ERRORS = {
   EMPTY_FORM: "아이디 / 패스워드 값이 비어있습니다",
   INVALID_EMAIL: "아이디 형식에 맞게 입력해주세요",
   INVALID_PASSWORD: "패스워드 길이는 8 이상이어야 합니다",
@@ -35,7 +35,13 @@ export const USER_VALIDATION_ERRORS = {
   EXIST_USER: "이미 존재하는 유저입니다",
 };
 
-export const TODO_VALIDATION_ERRORS = {
+const TODO_VALIDATION_ERRORS = {
   TODO_SOMETHING_WRONG: "todo를 찾는 도중 문제가 생겼습니다",
   INVALID_VALUE: "input을 다시 확인해주세요",
+};
+
+module.exports = {
+  loginValidator,
+  USER_VALIDATION_ERRORS,
+  TODO_VALIDATION_ERRORS,
 };

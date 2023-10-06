@@ -1,6 +1,6 @@
-import { Server } from "socket.io";
+const { Server } = require("socket.io");
 
-import getConnection from "../routes/pool.js";
+const getConnection = require("../routes/pool.js");
 
 class WebSocket {
   constructor() {
@@ -156,4 +156,4 @@ class WebSocket {
   }
 }
 
-export default new WebSocket();
+module.exports = new WebSocket();

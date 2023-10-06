@@ -1,9 +1,9 @@
-import { StatusCodes } from "http-status-codes";
+const { StatusCodes } = require("http-status-codes");
 
-import { verifyToken } from "../utils/authorizeUtils.js";
-import getConnection from "../routes/pool.js";
+const { verifyToken } = require("../utils/authorizeUtils.js");
+const getConnection = require("../routes/pool.js");
 
-export const authMiddleware = async (req, res, next) => {
+const authMiddleware = async (req, res, next) => {
   const cookie = req.get("cookie") ?? req.get("cookies");
 
   if (!cookie) {
@@ -38,4 +38,8 @@ export const authMiddleware = async (req, res, next) => {
       message: "토큰이 유효하지 않습니다.",
     });
   }
+};
+
+module.exports = {
+  authMiddleware,
 };

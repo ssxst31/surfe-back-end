@@ -1,8 +1,8 @@
-import { StatusCodes } from "http-status-codes";
+const { StatusCodes } = require("http-status-codes");
 
-import getConnection from "../routes/pool.js";
+const getConnection = require("../routes/pool.js");
 
-export const profile = async (req, res) => {
+const profile = async (req, res) => {
   getConnection((conn) => {
     const sql1 = `
     SELECT DISTINCT
@@ -36,7 +36,7 @@ export const profile = async (req, res) => {
   });
 };
 
-export const location = async (req, res) => {
+const location = async (req, res) => {
   const { lat, lng } = req.body;
 
   getConnection((conn) => {
@@ -55,7 +55,7 @@ export const location = async (req, res) => {
   });
 };
 
-export const upload = async (req, res) => {
+const upload = async (req, res) => {
   const timestamp = new Date().toISOString().replace(/:/g, "-").slice(0, 13);
   const aa = timestamp + "-" + decodeURIComponent(req.file.originalname);
 
@@ -73,7 +73,7 @@ export const upload = async (req, res) => {
   });
 };
 
-export const addFriend = async (req, res) => {
+const addFriend = async (req, res) => {
   const userId = req.memberId;
   const receiverId = req.body.friendId;
 
@@ -112,7 +112,7 @@ export const addFriend = async (req, res) => {
   });
 };
 
-export const deleteFriend = async (req, res) => {
+const deleteFriend = async (req, res) => {
   const userId = req.memberId;
   const receiverId = req.body.friendId;
 
@@ -140,7 +140,7 @@ export const deleteFriend = async (req, res) => {
   });
 };
 
-export const friendList = async (req, res) => {
+const friendList = async (req, res) => {
   const userId = req.memberId;
 
   const sql = `
@@ -202,7 +202,7 @@ export const friendList = async (req, res) => {
   });
 };
 
-export const friendReceiveList = async (req, res) => {
+const friendReceiveList = async (req, res) => {
   const userId = req.memberId;
 
   const sql = `
@@ -253,8 +253,7 @@ export const friendReceiveList = async (req, res) => {
     conn.release();
   });
 };
-
-export const friendRequestList = async (req, res) => {
+const friendRequestList = async (req, res) => {
   const userId = req.memberId;
 
   const sql = `
@@ -307,7 +306,7 @@ export const friendRequestList = async (req, res) => {
   });
 };
 
-export const chatList = async (req, res) => {
+const chatList = async (req, res) => {
   const userId = req.memberId;
 
   const checkQuery = `SELECT *
@@ -339,7 +338,7 @@ export const chatList = async (req, res) => {
   });
 };
 
-export const loadChat = async (req, res) => {
+const loadChat = async (req, res) => {
   const { limit, roomName } = req.query;
 
   getConnection((conn) => {
@@ -369,4 +368,17 @@ export const loadChat = async (req, res) => {
 
     conn.release();
   });
+};
+
+module.exports = {
+  profile,
+  location,
+  loadChat,
+  upload,
+  addFriend,
+  deleteFriend,
+  friendList,
+  friendReceiveList,
+  friendRequestList,
+  chatList,
 };

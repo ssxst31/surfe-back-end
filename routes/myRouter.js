@@ -1,8 +1,8 @@
-import express from "express";
-import { authMiddleware } from "../middlewares/authMiddleware.js";
-import * as myController from "../controllers/myController.js";
+const express = require("express");
 
-import { upload } from "../utils/multer.js";
+const { authMiddleware } = require("../middlewares/authMiddleware.js");
+const myController = require("../controllers/myController.js");
+const { upload } = require("../utils/multer.js");
 
 const router = express.Router();
 
@@ -22,4 +22,4 @@ router.get("/friend-receives", authMiddleware, myController.friendReceiveList);
 router.get("/chats", authMiddleware, myController.chatList);
 router.get("/chat", authMiddleware, myController.loadChat);
 
-export default router;
+module.exports = router;

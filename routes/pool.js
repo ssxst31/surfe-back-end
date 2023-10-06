@@ -1,6 +1,5 @@
-import mysql from "mysql2";
-
-import dotenv from "dotenv";
+const mysql = require("mysql2");
+const dotenv = require("dotenv");
 
 function isProduction() {
   return process.env.NODE_ENV === "production";
@@ -24,7 +23,7 @@ const dbConfig = 2
 
 const pool = mysql.createPool(dbConfig);
 
-export default function getConnection(callback) {
+function getConnection(callback) {
   pool.getConnection((error, conn) => {
     if (error) {
       return console.log(error);
@@ -33,3 +32,5 @@ export default function getConnection(callback) {
     callback(conn);
   });
 }
+
+module.exports = getConnection;

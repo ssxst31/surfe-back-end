@@ -1,7 +1,7 @@
-import http from "http";
-import ws from "./datasources/ws.js";
+const http = require("http");
+const ws = require("./datasources/ws.js");
 
-import app from "./app.js";
+const app = require("./app.js");
 
 const port = 3389;
 const server = http.createServer(app);

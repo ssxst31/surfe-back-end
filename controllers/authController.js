@@ -1,12 +1,15 @@
-import { StatusCodes } from "http-status-codes";
+const { StatusCodes } = require("http-status-codes");
 
-import { createError } from "../utils/responseUtils.js";
-import { loginValidator, USER_VALIDATION_ERRORS } from "../utils/validator.js";
-import { createToken } from "../utils/authorizeUtils.js";
-import getConnection from "../routes/pool.js";
-import { createHashedPassword, verifyPassword } from "../utils/hash.js";
+const { createError } = require("../utils/responseUtils.js");
+const {
+  loginValidator,
+  USER_VALIDATION_ERRORS,
+} = require("../utils/validator.js");
+const { createToken } = require("../utils/authorizeUtils.js");
+const getConnection = require("../routes/pool.js");
+const { createHashedPassword, verifyPassword } = require("../utils/hash.js");
 
-export const signUp = async (req, res) => {
+const signUp = async (req, res) => {
   const { id, password, nickname, interestList, mbti, statusMessage } =
     req.body;
 
@@ -79,7 +82,7 @@ export const signUp = async (req, res) => {
   });
 };
 
-export const login = async (req, res) => {
+const login = async (req, res) => {
   const { id, password } = req.body;
 
   const { isValid, message } = loginValidator({ id, password });
@@ -132,6 +135,12 @@ export const login = async (req, res) => {
   });
 };
 
-export const logout = async (req, res) => {
+const logout = async (req, res) => {
   return res.clearCookie("token", { domain: ".surfe.store" }).end();
+};
+
+module.exports = {
+  signUp,
+  login,
+  logout,
 };

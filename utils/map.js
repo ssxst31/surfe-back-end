@@ -1,4 +1,4 @@
-export function getDistance(lat1, lon1, lat2, lon2) {
+function getDistance(lat1, lon1, lat2, lon2) {
   if (lat1 == lat2 && lon1 == lon2) return 0;
 
   var radLat1 = (Math.PI * lat1) / 180;
@@ -18,3 +18,7 @@ export function getDistance(lat1, lon1, lat2, lon2) {
 
   return dist;
 }
+
+module.exports = {
+  getDistance,
+};
