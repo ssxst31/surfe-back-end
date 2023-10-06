@@ -5,4 +5,4 @@ cd $REPOSITORY
 
 sudo npm i
 
-pm2 start dist
+pm2 start dist/bundle.js
