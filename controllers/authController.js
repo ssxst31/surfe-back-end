@@ -8,6 +8,7 @@ const {
 const { createToken } = require("../utils/authorizeUtils.js");
 const getConnection = require("../routes/pool.js");
 const { createHashedPassword, verifyPassword } = require("../utils/hash.js");
+const { isProduction } = require("../utils/env.js");
 
 const signUp = async (req, res) => {
   const { id, password, nickname, interestList, mbti, statusMessage } =
@@ -63,10 +64,10 @@ const signUp = async (req, res) => {
               res
                 .cookie("token", createToken({ memberId: rows.insertId }), {
                   maxAge: 1000 * 60 * 60 * 24 * 7,
-                  secure: true,
+                  secure: isProduction(),
                   httpOnly: true,
                   samesite: "none",
-                  domain: ".surfe.store",
+                  domain: isProduction() ? ".surfe.store" : undefined,
                 })
                 .status(StatusCodes.OK)
                 .send({
@@ -117,10 +118,10 @@ const login = async (req, res) => {
             return res
               .cookie("token", createToken({ memberId: row.id }), {
                 maxAge: 1000 * 60 * 60 * 24 * 7,
-                secure: true,
+                secure: isProduction(),
                 httpOnly: true,
                 samesite: "none",
-                domain: ".surfe.store",
+                domain: isProduction() ? ".surfe.store" : undefined,
               })
               .status(StatusCodes.OK)
               .send({

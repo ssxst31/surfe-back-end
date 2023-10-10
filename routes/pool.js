@@ -1,11 +1,21 @@
 const mysql = require("mysql2");
 const dotenv = require("dotenv");
 
-function isProduction() {
-  return process.env.NODE_ENV === "production";
-}
+const path = require("path");
 
-dotenv.config();
+const envFile =
+  process.env.NODE_ENV === "production"
+    ? ".env.production"
+    : ".env.development";
+
+(() => {
+  const result = dotenv.config({
+    path: path.join(__dirname, "..", envFile),
+  });
+  if (result.error) {
+    throw new Error("Cannot load environment variables file.");
+  }
+})();
 
 const dbConfig = 2
   ? {
