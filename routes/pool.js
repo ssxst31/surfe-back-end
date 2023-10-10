@@ -7,7 +7,6 @@ const envFile =
   process.env.NODE_ENV === "production"
     ? ".env.production"
     : ".env.development";
-
 (() => {
   const result = dotenv.config({
     path: path.join(__dirname, "..", envFile),
@@ -17,19 +16,14 @@ const envFile =
   }
 })();
 
-const dbConfig = 2
-  ? {
-      uri: process.env.DATABASE_URL,
-      multipleStatements: true,
-    }
-  : {
-      host: process.env.DB_HOST,
-      port: process.env.DB_PORT,
-      user: process.env.DB_USER,
-      password: process.env.DB_PASSWORD,
-      database: process.env.DB_DATABASE,
-      multipleStatements: true,
-    };
+const dbConfig = {
+  host: process.env.DB_HOST,
+  port: process.env.DB_PORT,
+  user: process.env.DB_USER,
+  password: process.env.DB_PASSWORD,
+  database: process.env.DB_DATABASE,
+  multipleStatements: true,
+};
 
 const pool = mysql.createPool(dbConfig);
 
