@@ -28,9 +28,9 @@ jobs:
         working-directory: ./
         run: |
           pwd
-          touch .env
-          echo DATABASE_URL=${{ secrets.DATABASE_URL }} >> .env
-          cat .env
+          touch .env.production
+          echo DATABASE_URL=${{ secrets.DATABASE_URL }} >> .env.production
+          cat .env.production
 
       - name: ✨ 패키지 설치
         working-directory: ./
