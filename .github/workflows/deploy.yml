@@ -27,7 +27,11 @@ jobs:
       - name: ⚙️ 환경변수를 설정합니다.
         working-directory: ./
         run: |
-          echo "DATABASE_URL=${{ secrets.DATABASE_URL }}" > .env.production
+          echo "DB_HOST=${{ secrets.DB_HOST }}" > .env.production
+          echo "DB_PORT=${{ secrets.DB_PORT }}" > .env.production
+          echo "DB_USER=${{ secrets.DB_USER }}" > .env.production
+          echo "DB_PASSWORD=${{ secrets.DB_PASSWORD }}" > .env.production
+          echo "DB_DATABASE=${{ secrets.DB_DATABASE }}" > .env.production
 
       - name: ✨ 패키지 설치
         working-directory: ./
