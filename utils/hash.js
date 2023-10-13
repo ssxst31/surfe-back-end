@@ -26,8 +26,15 @@ const verifyPassword = async (password, userSalt, userPassword) => {
   return false;
 };
 
+const createKakaoId = async (id) => {
+  const hash = crypto.createHash("sha512").update(String(id)).digest("hex");
+
+  return hash.slice(0, 15);
+};
+
 module.exports = {
   createSalt,
   createHashedPassword,
   verifyPassword,
+  createKakaoId,
 };

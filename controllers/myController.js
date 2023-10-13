@@ -15,7 +15,7 @@ const profile = async (req, res) => {
     interest.member_id,
     interest.title
     FROM user
-    join interest on user.id = interest.member_id
+    LEFT JOIN interest ON user.id = interest.member_id
     WHERE user.id LIKE '${req.memberId}'
    `;
 
@@ -26,7 +26,7 @@ const profile = async (req, res) => {
         nickname: rows[0].nickname,
         profileImage: rows[0].profile_image,
         statusMessage: rows[0].status_message,
-        interestList: [rows[0].title, rows[1].title, rows[2].title],
+        interestList: [rows[0]?.title, rows[1]?.title, rows[2]?.title],
         mbti: rows[0].mbti,
       };
       return res.status(StatusCodes.OK).send(row);
