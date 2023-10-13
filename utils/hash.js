@@ -3,7 +3,6 @@ const util = require("util");
 
 const randomBytesPromise = util.promisify(crypto.randomBytes);
 const pbkdf2Promise = util.promisify(crypto.pbkdf2);
-
 const createSalt = async () => {
   const buf = await randomBytesPromise(64);
 

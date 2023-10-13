@@ -75,7 +75,7 @@ const signUp = async (req, res) => {
                 })
                 .status(StatusCodes.OK)
                 .send({
-                  message: "계정이 성공적으로 생성되었습니다",
+                  message: "OK",
                 })
             );
           });
@@ -131,7 +131,7 @@ const kakaoLogin = async (req, res) => {
             })
             .status(StatusCodes.OK)
             .send({
-              message: "계정이 성공적으로 생성되었습니다",
+              message: "OK",
             });
         });
       }
