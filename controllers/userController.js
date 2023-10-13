@@ -14,7 +14,7 @@ const userListByMeDistance = async (req, res) => {
     conn.query(sql, (error, rows) => {
       const me = rows.find((row) => row.id === req.memberId);
       const sql2 = `SELECT * FROM friend WHERE sender_id LIKE'${req.memberId}' OR receiver_id LIKE'${req.memberId}'`;
-      console.log(1);
+
       conn.query(sql2, (error, rows22) => {
         if (error) {
           return console.log(error);
@@ -30,8 +30,7 @@ const userListByMeDistance = async (req, res) => {
                 Number(row.lng)
               ) / 1000;
 
-            // 거리가 5km 이내이고, 현재 사용자(me)와 다른 사용자인 경우에만 필터링합니다.
-            return distance < 5 && me.id !== row.id;
+            return distance < 5 && me.id !== row.id && row.lat && row.lng;
           })
           .map((row) => {
             const sentRequests = rows22.filter(
