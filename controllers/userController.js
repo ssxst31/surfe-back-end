@@ -113,7 +113,29 @@ const profile = async (req, res) => {
   });
 };
 
+const checkUserId = async (req, res) => {
+  const { userId } = req.params;
+
+  getConnection((conn) => {
+    const sql = `SELECT sql_calc_found_rows * from user
+    WHERE login_id LIKE '${userId}';`;
+
+    conn.query(sql, (error, rows) => {
+      if (rows.length > 0) {
+        return res.status(StatusCodes.CONFLICT).send({
+          message: "이미 있는 아이디 입니다.",
+        });
+      } else {
+        return res.status(StatusCodes.OK).send("OK");
+      }
+    });
+
+    conn.release();
+  });
+};
+
 module.exports = {
   userListByMeDistance,
   profile,
+  checkUserId,
 };
