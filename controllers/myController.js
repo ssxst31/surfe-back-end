@@ -370,6 +370,27 @@ const loadChat = async (req, res) => {
   });
 };
 
+const updateProfile = async (req, res) => {
+  const { memberId } = req;
+  const { statusMessage, nickname, mbti } = req.body;
+
+  getConnection((conn) => {
+    const sql1 = `
+    UPDATE user
+    SET status_message = '${statusMessage}', nickname = '${nickname}', mbti = '${mbti}'
+    WHERE id = '${memberId}';
+    `;
+
+    conn.query(sql1, (error, rows) => {
+      if (error) throw error;
+
+      return res.status(StatusCodes.OK).send("OK");
+    });
+
+    conn.release();
+  });
+};
+
 module.exports = {
   profile,
   location,
@@ -381,4 +402,5 @@ module.exports = {
   friendReceiveList,
   friendRequestList,
   chatList,
+  updateProfile,
 };

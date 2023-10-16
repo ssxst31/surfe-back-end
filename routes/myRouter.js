@@ -21,5 +21,6 @@ router.get("/friend-requests", authMiddleware, myController.friendRequestList);
 router.get("/friend-receives", authMiddleware, myController.friendReceiveList);
 router.get("/chats", authMiddleware, myController.chatList);
 router.get("/chat", authMiddleware, myController.loadChat);
+router.put("/profile", authMiddleware, myController.updateProfile);
 
 module.exports = router;
